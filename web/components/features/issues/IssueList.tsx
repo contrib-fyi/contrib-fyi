@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useFilterStore } from '@/lib/store/useFilterStore';
 import { searchIssues, SearchIssuesResponse } from '@/lib/github/client';
 import { IssueRow } from './IssueRow';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTokenStore } from '@/lib/store/useTokenStore';
+import { IssueSnapshot, toIssueSnapshot } from '@/lib/github/issueSnapshot';
 
 const buildOrQuery = (
   values: string[],
@@ -19,19 +21,27 @@ const buildOrQuery = (
 
 export function IssueList() {
   const { language, label, sort, searchQuery } = useFilterStore();
-  const [data, setData] = useState<SearchIssuesResponse | null>(null);
+  const token = useTokenStore((state) => state.token);
+  const [data, setData] = useState<SearchIssuesResponse<IssueSnapshot> | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     setPage(1); // Reset page when filters change
   }, [language, label, sort, searchQuery]);
 
   useEffect(() => {
+    const controller = new AbortController();
+    let isSubscribed = true;
+
     const fetchIssues = async () => {
       setLoading(true);
       setError(null);
+
       try {
         const qParts = ['is:issue', 'is:open'];
 
@@ -55,40 +65,64 @@ export function IssueList() {
 
         const q = qParts.join(' ');
 
-        const res = await searchIssues({
-          q,
-          sort,
-          order: 'desc',
-          per_page: 20,
-          page,
-        });
-        setData(res);
+        const res = await searchIssues(
+          {
+            q,
+            sort,
+            order: 'desc',
+            per_page: 20,
+            page,
+          },
+          {
+            signal: controller.signal,
+            token,
+          }
+        );
+
+        if (!controller.signal.aborted && isSubscribed) {
+          const snapshots = res.items.map((item) => toIssueSnapshot(item));
+          setData({ ...res, items: snapshots });
+        }
       } catch (err: unknown) {
+        if (controller.signal.aborted || !isSubscribed) return;
+
         if (err instanceof Error) {
           setError(err.message);
         } else {
           setError('Failed to fetch issues');
         }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted && isSubscribed) {
+          setLoading(false);
+        }
       }
     };
 
-    // Debounce could be added here, but for now direct call
-    const timeoutId = setTimeout(fetchIssues, 300);
-    return () => clearTimeout(timeoutId);
-  }, [language, label, sort, searchQuery, page]);
+    fetchIssues();
+
+    return () => {
+      isSubscribed = false;
+      controller.abort();
+    };
+  }, [language, label, sort, searchQuery, page, token, refreshKey]);
+
+  const totalPages = useMemo(() => {
+    if (!data) return 1;
+    const MAX_RESULTS = 1000; // GitHub search API caps results at 1000
+    const totalResults = Math.min(data.total_count, MAX_RESULTS);
+    return Math.max(1, Math.ceil(totalResults / 20));
+  }, [data]);
+
+  const handleRetry = () => {
+    setRefreshKey((key) => key + 1);
+  };
 
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center">
         <h3 className="text-lg font-semibold text-red-500">Error</h3>
         <p className="text-muted-foreground">{error}</p>
-        <Button
-          variant="outline"
-          className="mt-4"
-          onClick={() => window.location.reload()}
-        >
+        <Button variant="outline" className="mt-4" onClick={handleRetry}>
           Retry
         </Button>
       </div>
@@ -150,8 +184,8 @@ export function IssueList() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setPage((p) => p + 1)}
-          disabled={data.items.length < 20} // Simple check, ideally check total_count
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          disabled={page >= totalPages}
         >
           Next
           <ChevronRight className="ml-2 h-4 w-4" />

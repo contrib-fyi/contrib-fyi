@@ -8,7 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { GitHubIssue } from '@/lib/github/client';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Bookmark } from 'lucide-react';
 import { usePickStore } from '@/lib/store/usePickStore';
@@ -16,9 +15,10 @@ import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { IssueSnapshot } from '@/lib/github/issueSnapshot';
 
 interface IssueDetailModalProps {
-  issue: GitHubIssue;
+  issue: IssueSnapshot;
   children: React.ReactNode;
 }
 
@@ -88,7 +88,10 @@ export function IssueDetailModal({ issue, children }: IssueDetailModalProps) {
                   <h3 className="mt-4 mb-2 text-lg font-semibold" {...props} />
                 ),
                 p: ({ ...props }) => (
-                  <p className="mb-4 leading-relaxed break-words" {...props} />
+                  <p
+                    className="mb-4 leading-relaxed wrap-break-word"
+                    {...props}
+                  />
                 ),
                 ul: ({ ...props }) => (
                   <ul className="mb-4 list-disc space-y-1 pl-6" {...props} />
