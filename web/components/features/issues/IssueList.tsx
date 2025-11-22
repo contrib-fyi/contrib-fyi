@@ -8,6 +8,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+const buildOrQuery = (
+  values: string[],
+  formatter: (value: string) => string
+) => {
+  if (values.length === 0) return null;
+  if (values.length === 1) return formatter(values[0]);
+  return `(${values.map(formatter).join(' OR ')})`;
+};
+
 export function IssueList() {
   const { language, label, sort, searchQuery } = useFilterStore();
   const [data, setData] = useState<SearchIssuesResponse | null>(null);
@@ -26,15 +35,15 @@ export function IssueList() {
       try {
         const qParts = ['is:issue', 'is:open'];
 
-        // Add language filters (space-separated for OR condition)
-        if (language.length > 0) {
-          const langQuery = language.map((l) => `language:"${l}"`).join(' ');
-          qParts.push(langQuery);
+        // Add language filters (explicit OR condition)
+        const languageQuery = buildOrQuery(language, (lang) => `language:"${lang}"`);
+        if (languageQuery) {
+          qParts.push(languageQuery);
         }
 
-        // Add label filters (space-separated for OR condition)
-        if (label.length > 0) {
-          const labelQuery = label.map((l) => `label:"${l}"`).join(' ');
+        // Add label filters (explicit OR condition)
+        const labelQuery = buildOrQuery(label, (lbl) => `label:"${lbl}"`);
+        if (labelQuery) {
           qParts.push(labelQuery);
         }
 

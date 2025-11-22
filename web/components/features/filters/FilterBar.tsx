@@ -59,7 +59,7 @@ export function FilterBar() {
   const handleReset = () => {
     resetFilters();
     setLocalLanguage([]);
-    setLocalLabel([]);
+    setLocalLabel(['help wanted']);
     setLocalSort('created');
     setLocalSearchQuery('');
   };
