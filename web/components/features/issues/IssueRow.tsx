@@ -18,6 +18,7 @@ import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRepositoryWithCache } from '@/lib/github/repositoryCache';
 import { IssueSnapshot } from '@/lib/github/issueSnapshot';
+import { useTokenStore } from '@/lib/store/useTokenStore';
 
 interface IssueRowProps {
   issue: IssueSnapshot;
@@ -26,6 +27,7 @@ interface IssueRowProps {
 export function IssueRow({ issue }: IssueRowProps) {
   const { addPick, removePick, isPicked } = usePickStore();
   const { addToHistory } = useHistoryStore();
+  const token = useTokenStore((state) => state.token);
   const picked = isPicked(issue.id);
   const [repository, setRepository] = useState<GitHubRepository | null>(
     issue.repository || null
@@ -46,7 +48,10 @@ export function IssueRow({ issue }: IssueRowProps) {
 
     const controller = new AbortController();
 
-    getRepositoryWithCache(owner, repo, controller.signal)
+    getRepositoryWithCache(owner, repo, {
+      signal: controller.signal,
+      token,
+    })
       .then((repoData) => {
         if (!controller.signal.aborted) {
           setRepository(repoData);
@@ -61,7 +66,7 @@ export function IssueRow({ issue }: IssueRowProps) {
     return () => {
       controller.abort();
     };
-  }, [issue.repository, owner, repo]);
+  }, [issue.repository, owner, repo, token]);
 
   const handlePickToggle = (e: React.MouseEvent) => {
     e.preventDefault();
