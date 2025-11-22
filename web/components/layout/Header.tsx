@@ -61,11 +61,7 @@ export function Header() {
             <Moon className="absolute h-5 w-5 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
             <span className="sr-only">Toggle theme</span>
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-          >
+          <Button variant="ghost" size="icon" asChild>
             <a
               href="https://github.com/contrib-fyi/contrib-fyi"
               target="_blank"
