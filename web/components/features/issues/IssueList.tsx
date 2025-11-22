@@ -19,8 +19,16 @@ const buildOrQuery = (
   return `(${values.map(formatter).join(' OR ')})`;
 };
 
+const escapeForQualifier = (value: string) => `"${value.replace(/"/g, '\\"')}"`;
+
+const buildLabelQuery = (labels: string[]) => {
+  if (labels.length === 0) return null;
+  return `label:${labels.map(escapeForQualifier).join(',')}`;
+};
+
 export function IssueList() {
-  const { language, label, sort, searchQuery } = useFilterStore();
+  const { language, label, sort, searchQuery, onlyNoComments } =
+    useFilterStore();
   const token = useTokenStore((state) => state.token);
   const [data, setData] = useState<SearchIssuesResponse<IssueSnapshot> | null>(
     null
@@ -32,7 +40,7 @@ export function IssueList() {
 
   useEffect(() => {
     setPage(1); // Reset page when filters change
-  }, [language, label, sort, searchQuery]);
+  }, [language, label, sort, searchQuery, onlyNoComments]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -54,10 +62,14 @@ export function IssueList() {
           qParts.push(languageQuery);
         }
 
-        // Add label filters (explicit OR condition)
-        const labelQuery = buildOrQuery(label, (lbl) => `label:"${lbl}"`);
+        // Add label filters (comma-separated OR)
+        const labelQuery = buildLabelQuery(label);
         if (labelQuery) {
           qParts.push(labelQuery);
+        }
+
+        if (onlyNoComments) {
+          qParts.push('comments:0');
         }
 
         // Add search query
@@ -104,7 +116,16 @@ export function IssueList() {
       isSubscribed = false;
       controller.abort();
     };
-  }, [language, label, sort, searchQuery, page, token, refreshKey]);
+  }, [
+    language,
+    label,
+    sort,
+    searchQuery,
+    onlyNoComments,
+    page,
+    token,
+    refreshKey,
+  ]);
 
   const totalPages = useMemo(() => {
     if (!data) return 1;

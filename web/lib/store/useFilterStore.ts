@@ -8,10 +8,12 @@ interface FilterState {
   label: string[];
   sort: 'created' | 'updated' | 'comments';
   searchQuery: string;
+  onlyNoComments: boolean;
   setLanguage: (language: string[]) => void;
   setLabel: (label: string[]) => void;
   setSort: (sort: 'created' | 'updated' | 'comments') => void;
   setSearchQuery: (query: string) => void;
+  setOnlyNoComments: (onlyNoComments: boolean) => void;
   resetFilters: () => void;
 }
 
@@ -22,16 +24,19 @@ export const useFilterStore = create<FilterState>()(
       label: ['help wanted'], // Default label
       sort: 'created',
       searchQuery: '',
+      onlyNoComments: false,
       setLanguage: (language) => set({ language }),
       setLabel: (label) => set({ label }),
       setSort: (sort) => set({ sort }),
       setSearchQuery: (searchQuery) => set({ searchQuery }),
+      setOnlyNoComments: (onlyNoComments) => set({ onlyNoComments }),
       resetFilters: () =>
         set({
           language: [],
           label: ['help wanted'],
           sort: 'created',
           searchQuery: '',
+          onlyNoComments: false,
         }),
     }),
     {
@@ -42,6 +47,7 @@ export const useFilterStore = create<FilterState>()(
         label: state.label,
         sort: state.sort,
         searchQuery: state.searchQuery,
+        onlyNoComments: state.onlyNoComments,
       }),
     }
   )

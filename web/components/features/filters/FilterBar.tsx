@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -11,14 +11,25 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useFilterStore } from '@/lib/store/useFilterStore';
-import { X, Search } from 'lucide-react';
+import { X, Search, SlidersHorizontal } from 'lucide-react';
 import { MultiSelect } from '@/components/ui/multi-select';
+import { Switch } from '@/components/ui/switch';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 export function FilterBar() {
   const {
@@ -26,10 +37,12 @@ export function FilterBar() {
     label: appliedLabel,
     sort: appliedSort,
     searchQuery: appliedSearchQuery,
+    onlyNoComments: appliedOnlyNoComments,
     setLanguage,
     setLabel,
     setSort,
     setSearchQuery,
+    setOnlyNoComments,
     resetFilters,
   } = useFilterStore();
 
@@ -40,6 +53,10 @@ export function FilterBar() {
     'created' | 'updated' | 'comments'
   >(appliedSort);
   const [localSearchQuery, setLocalSearchQuery] = useState(appliedSearchQuery);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [pendingOnlyNoComments, setPendingOnlyNoComments] = useState(
+    appliedOnlyNoComments
+  );
 
   // Sync local state when applied filters change (e.g., from reset)
   useEffect(() => {
@@ -71,28 +88,77 @@ export function FilterBar() {
   };
 
   // Handle Enter key in search input
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
 
+  const handleAdvancedApply = () => {
+    setOnlyNoComments(pendingOnlyNoComments);
+    setAdvancedOpen(false);
+  };
+
+  const handleAdvancedOpenChange = (open: boolean) => {
+    setAdvancedOpen(open);
+    if (open) {
+      setPendingOnlyNoComments(appliedOnlyNoComments);
+    }
+  };
+
+  const appliedFilterChips = [
+    ...appliedLanguage.map((lang) => ({
+      key: `language-${lang}`,
+      label: `Language: ${lang}`,
+      onRemove: () =>
+        setLanguage(appliedLanguage.filter((value) => value !== lang)),
+    })),
+    ...appliedLabel.map((lbl) => ({
+      key: `label-${lbl}`,
+      label: `Label: ${lbl}`,
+      onRemove: () => setLabel(appliedLabel.filter((value) => value !== lbl)),
+    })),
+    ...(appliedSearchQuery
+      ? [
+          {
+            key: 'search',
+            label: `Search: "${appliedSearchQuery}"`,
+            onRemove: () => {
+              setSearchQuery('');
+              setLocalSearchQuery('');
+            },
+          },
+        ]
+      : []),
+    ...(appliedOnlyNoComments
+      ? [
+          {
+            key: 'no-comments',
+            label: 'No comments',
+            onRemove: () => setOnlyNoComments(false),
+          },
+        ]
+      : []),
+  ];
+
+  const hasAppliedFilters = appliedFilterChips.length > 0;
+
   return (
-    <div className="flex flex-col gap-4 border-b p-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center">
-        <div className="flex flex-1 flex-col gap-4 md:flex-row md:items-center">
+    <div className="space-y-4 border-b p-4">
+      <div className="space-y-4">
+        <div className="space-y-3">
           <Input
             placeholder="Search issues..."
             value={localSearchQuery}
             onChange={(e) => setLocalSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full md:w-[300px]"
+            className="w-full lg:max-w-lg"
           />
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="w-full md:w-auto">
+                  <div>
                     <MultiSelect
                       options={[
                         { label: 'C', value: 'c' },
@@ -144,7 +210,7 @@ export function FilterBar() {
                       selected={localLanguage}
                       onChange={setLocalLanguage}
                       placeholder="Language"
-                      className="w-full md:w-[180px]"
+                      className="w-full"
                     />
                   </div>
                 </TooltipTrigger>
@@ -155,7 +221,7 @@ export function FilterBar() {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="w-full md:w-auto">
+                  <div>
                     <MultiSelect
                       options={[
                         { label: 'help wanted', value: 'help wanted' },
@@ -170,7 +236,7 @@ export function FilterBar() {
                       selected={localLabel}
                       onChange={setLocalLabel}
                       placeholder="Label"
-                      className="w-full md:w-[180px]"
+                      className="w-full"
                     />
                   </div>
                 </TooltipTrigger>
@@ -181,14 +247,14 @@ export function FilterBar() {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="w-full md:w-auto">
+                  <div>
                     <Select
                       value={localSort}
                       onValueChange={(val) =>
                         setLocalSort(val as 'created' | 'updated' | 'comments')
                       }
                     >
-                      <SelectTrigger className="w-full md:w-[140px]">
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Sort by" />
                       </SelectTrigger>
                       <SelectContent>
@@ -208,22 +274,93 @@ export function FilterBar() {
             </TooltipProvider>
           </div>
         </div>
-
-        <div className="flex gap-2">
-          <Button onClick={handleSearch} className="flex-1 md:flex-initial">
-            <Search className="mr-2 h-4 w-4" />
-            Search
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={handleReset}
-            className="flex-1 md:flex-initial"
-          >
-            <X className="mr-2 h-4 w-4" />
-            Reset
-          </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Dialog open={advancedOpen} onOpenChange={handleAdvancedOpenChange}>
+            <DialogTrigger asChild>
+              <Button
+                type="button"
+                variant={appliedOnlyNoComments ? 'secondary' : 'outline'}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                More filters
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Advanced filters</DialogTitle>
+                <DialogDescription>
+                  Narrow results with extra criteria like comments.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Comments</p>
+                  <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-1 pr-4">
+                      <p className="text-sm font-medium">
+                        Only issues with zero comments
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        Show issues that have not received any comments yet.
+                      </p>
+                    </div>
+                    <Switch
+                      id="advanced-no-comments"
+                      checked={pendingOnlyNoComments}
+                      onCheckedChange={setPendingOnlyNoComments}
+                    />
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setAdvancedOpen(false)}
+                >
+                  Close
+                </Button>
+                <Button type="button" onClick={handleAdvancedApply}>
+                  Apply filters
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <Button type="button" onClick={handleSearch}>
+              <Search className="mr-2 h-4 w-4" />
+              Search
+            </Button>
+            <Button type="button" variant="ghost" onClick={handleReset}>
+              <X className="mr-2 h-4 w-4" />
+              Reset
+            </Button>
+          </div>
         </div>
       </div>
+      {hasAppliedFilters && (
+        <div className="bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border p-3">
+          {appliedFilterChips.map((chip) => (
+            <Badge
+              key={chip.key}
+              variant="secondary"
+              className="flex items-center gap-2 rounded-full px-3 py-1 text-sm"
+            >
+              {chip.label}
+              <button
+                type="button"
+                onClick={chip.onRemove}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={`Remove ${chip.label}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
