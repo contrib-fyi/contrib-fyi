@@ -37,7 +37,7 @@ export function IssueDetailModal({ issue, children }: IssueDetailModalProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-h-[85vh] max-w-4xl overflow-y-auto">
+      <DialogContent className="max-h-[85vh] max-w-[calc(100%-2rem)] overflow-y-auto sm:max-w-6xl">
         <DialogHeader>
           <DialogTitle className="mr-8 text-xl leading-normal">
             {issue.title}
