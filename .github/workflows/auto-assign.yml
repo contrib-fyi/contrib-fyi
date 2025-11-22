@@ -30,6 +30,7 @@ jobs:
           script: |
             const prAuthor = context.payload.pull_request.user.login;
             const prNumber = context.payload.pull_request.number;
+            const reviewer = 'K-dash';
 
             // Assign PR author
             await github.rest.issues.addAssignees({
@@ -39,10 +40,14 @@ jobs:
               assignees: [prAuthor]
             });
 
-            // Request review from K-dash
-            await github.rest.pulls.requestReviewers({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-              reviewers: ['K-dash']
-            });
+            // Request review from K-dash (skip if author is K-dash)
+            if (prAuthor !== reviewer) {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                reviewers: [reviewer]
+              });
+            } else {
+              core.info('Skipping reviewer assignment because author is K-dash');
+            }
