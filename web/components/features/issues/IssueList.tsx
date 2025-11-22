@@ -36,7 +36,10 @@ export function IssueList() {
         const qParts = ['is:issue', 'is:open'];
 
         // Add language filters (explicit OR condition)
-        const languageQuery = buildOrQuery(language, (lang) => `language:"${lang}"`);
+        const languageQuery = buildOrQuery(
+          language,
+          (lang) => `language:"${lang}"`
+        );
         if (languageQuery) {
           qParts.push(languageQuery);
         }
