@@ -14,7 +14,7 @@ interface FilterState {
 
 export const useFilterStore = create<FilterState>((set) => ({
   language: [],
-  label: [], // Default label
+  label: ['help wanted'], // Default label
   sort: 'created',
   searchQuery: '',
   setLanguage: (language) => set({ language }),
@@ -24,7 +24,7 @@ export const useFilterStore = create<FilterState>((set) => ({
   resetFilters: () =>
     set({
       language: [],
-      label: [],
+      label: ['help wanted'],
       sort: 'created',
       searchQuery: '',
     }),
