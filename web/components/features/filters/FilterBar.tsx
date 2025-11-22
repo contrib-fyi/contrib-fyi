@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -42,12 +42,18 @@ export function FilterBar() {
   const [localSearchQuery, setLocalSearchQuery] = useState(appliedSearchQuery);
 
   // Sync local state when applied filters change (e.g., from reset)
-  useState(() => {
-    setLocalLanguage(appliedLanguage);
-    setLocalLabel(appliedLabel);
-    setLocalSort(appliedSort);
-    setLocalSearchQuery(appliedSearchQuery);
-  });
+  useEffect(() => {
+    const unsubscribe = useFilterStore.subscribe((state) => {
+      setLocalLanguage(state.language);
+      setLocalLabel(state.label);
+      setLocalSort(state.sort);
+      setLocalSearchQuery(state.searchQuery);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const handleSearch = () => {
     setLanguage(localLanguage);
@@ -65,7 +71,7 @@ export function FilterBar() {
   };
 
   // Handle Enter key in search input
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
@@ -79,7 +85,7 @@ export function FilterBar() {
             placeholder="Search issues..."
             value={localSearchQuery}
             onChange={(e) => setLocalSearchQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             className="w-full md:w-[300px]"
           />
           <div className="flex flex-wrap gap-2">

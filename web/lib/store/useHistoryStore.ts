@@ -1,12 +1,20 @@
+'use client';
+
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { GitHubIssue } from '../github/client';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { IssueSnapshot } from '@/lib/github/issueSnapshot';
+
+interface HistoryEntry extends IssueSnapshot {
+  viewedAt: number;
+}
 
 interface HistoryState {
-  history: (GitHubIssue & { viewedAt: number })[];
-  addToHistory: (issue: GitHubIssue) => void;
+  history: HistoryEntry[];
+  addToHistory: (issue: IssueSnapshot) => void;
   clearHistory: () => void;
 }
+
+const MAX_HISTORY = 50;
 
 export const useHistoryStore = create<HistoryState>()(
   persist(
@@ -16,14 +24,17 @@ export const useHistoryStore = create<HistoryState>()(
         const { history } = get();
         // Remove if already exists to move it to top
         const filtered = history.filter((h) => h.id !== issue.id);
-        const newEntry = { ...issue, viewedAt: Date.now() };
-        // Keep max 50 items
-        set({ history: [newEntry, ...filtered].slice(0, 50) });
+        const newEntry: HistoryEntry = {
+          ...issue,
+          viewedAt: Date.now(),
+        };
+        set({ history: [newEntry, ...filtered].slice(0, MAX_HISTORY) });
       },
       clearHistory: () => set({ history: [] }),
     }),
     {
       name: 'contrib-fyi-history',
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );

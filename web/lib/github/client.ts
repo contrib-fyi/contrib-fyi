@@ -85,10 +85,15 @@ export interface GitHubRepository {
   default_branch: string;
 }
 
-export interface SearchIssuesResponse {
+interface RequestOptions {
+  signal?: AbortSignal;
+  token?: string | null;
+}
+
+export interface SearchIssuesResponse<TIssue = GitHubIssue> {
   total_count: number;
   incomplete_results: boolean;
-  items: GitHubIssue[];
+  items: TIssue[];
 }
 
 export interface SearchParams {
@@ -102,8 +107,9 @@ export interface SearchParams {
 const BASE_URL = 'https://api.github.com';
 
 export async function searchIssues(
-  params: SearchParams
-): Promise<SearchIssuesResponse> {
+  params: SearchParams,
+  options?: RequestOptions
+): Promise<SearchIssuesResponse<GitHubIssue>> {
   const searchParams = new URLSearchParams();
   searchParams.append('q', params.q);
   if (params.sort) searchParams.append('sort', params.sort);
@@ -118,16 +124,20 @@ export async function searchIssues(
 
   // Add GitHub token if available (for higher rate limits)
   const token =
-    typeof window !== 'undefined'
+    options?.token ??
+    (typeof window !== 'undefined'
       ? localStorage.getItem('github_token')
-      : process.env.NEXT_PUBLIC_GITHUB_TOKEN;
+      : process.env.NEXT_PUBLIC_GITHUB_TOKEN);
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
   const response = await fetch(
     `${BASE_URL}/search/issues?${searchParams.toString()}`,
-    { headers }
+    {
+      headers,
+      signal: options?.signal,
+    }
   );
 
   if (!response.ok) {
@@ -142,7 +152,8 @@ export async function searchIssues(
 
 export async function getRepository(
   owner: string,
-  repo: string
+  repo: string,
+  options?: RequestOptions
 ): Promise<GitHubRepository> {
   const headers: HeadersInit = {
     Accept: 'application/vnd.github.v3+json',
@@ -159,6 +170,7 @@ export async function getRepository(
 
   const response = await fetch(`${BASE_URL}/repos/${owner}/${repo}`, {
     headers,
+    signal: options?.signal,
   });
 
   if (!response.ok) {

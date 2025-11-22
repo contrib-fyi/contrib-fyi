@@ -1,6 +1,5 @@
 'use client';
 
-import { GitHubIssue } from '@/lib/github/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,12 +13,14 @@ import { formatDistanceToNow } from 'date-fns';
 import { usePickStore } from '@/lib/store/usePickStore';
 import { useHistoryStore } from '@/lib/store/useHistoryStore';
 import { IssueDetailModal } from './IssueDetailModal';
-import { getRepository, GitHubRepository } from '@/lib/github/client';
+import { GitHubRepository } from '@/lib/github/client';
 import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getRepositoryWithCache } from '@/lib/github/repositoryCache';
+import { IssueSnapshot } from '@/lib/github/issueSnapshot';
 
 interface IssueRowProps {
-  issue: GitHubIssue;
+  issue: IssueSnapshot;
 }
 
 export function IssueRow({ issue }: IssueRowProps) {
@@ -39,13 +40,27 @@ export function IssueRow({ issue }: IssueRowProps) {
 
   // Fetch repository info if not already available
   useEffect(() => {
-    if (!issue.repository && owner && repo) {
-      getRepository(owner, repo)
-        .then(setRepository)
-        .catch((err) => {
-          console.error('Failed to fetch repository info:', err);
-        });
+    if (issue.repository || !owner || !repo) {
+      return;
     }
+
+    const controller = new AbortController();
+
+    getRepositoryWithCache(owner, repo, controller.signal)
+      .then((repoData) => {
+        if (!controller.signal.aborted) {
+          setRepository(repoData);
+        }
+      })
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        console.error('Failed to fetch repository info:', err);
+      });
+
+    return () => {
+      controller.abort();
+    };
   }, [issue.repository, owner, repo]);
 
   const handlePickToggle = (e: React.MouseEvent) => {
@@ -67,7 +82,7 @@ export function IssueRow({ issue }: IssueRowProps) {
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-1 gap-3">
           {/* User Avatar */}
-          <Avatar className="h-10 w-10 flex-shrink-0">
+          <Avatar className="h-10 w-10 shrink-0">
             <AvatarImage src={issue.user.avatar_url} alt={issue.user.login} />
             <AvatarFallback>
               {issue.user.login.slice(0, 2).toUpperCase()}
@@ -90,7 +105,7 @@ export function IssueRow({ issue }: IssueRowProps) {
                 href={issue.html_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground flex-shrink-0"
+                className="text-muted-foreground hover:text-foreground shrink-0"
               >
                 <ExternalLink className="h-3 w-3" />
               </a>

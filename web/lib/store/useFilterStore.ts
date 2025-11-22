@@ -1,4 +1,7 @@
+'use client';
+
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface FilterState {
   language: string[];
@@ -12,20 +15,34 @@ interface FilterState {
   resetFilters: () => void;
 }
 
-export const useFilterStore = create<FilterState>((set) => ({
-  language: [],
-  label: ['help wanted'], // Default label
-  sort: 'created',
-  searchQuery: '',
-  setLanguage: (language) => set({ language }),
-  setLabel: (label) => set({ label }),
-  setSort: (sort) => set({ sort }),
-  setSearchQuery: (searchQuery) => set({ searchQuery }),
-  resetFilters: () =>
-    set({
+export const useFilterStore = create<FilterState>()(
+  persist(
+    (set) => ({
       language: [],
-      label: ['help wanted'],
+      label: ['help wanted'], // Default label
       sort: 'created',
       searchQuery: '',
+      setLanguage: (language) => set({ language }),
+      setLabel: (label) => set({ label }),
+      setSort: (sort) => set({ sort }),
+      setSearchQuery: (searchQuery) => set({ searchQuery }),
+      resetFilters: () =>
+        set({
+          language: [],
+          label: ['help wanted'],
+          sort: 'created',
+          searchQuery: '',
+        }),
     }),
-}));
+    {
+      name: 'contrib-fyi-filters',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        language: state.language,
+        label: state.label,
+        sort: state.sort,
+        searchQuery: state.searchQuery,
+      }),
+    }
+  )
+);

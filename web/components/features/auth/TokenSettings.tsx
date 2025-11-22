@@ -19,12 +19,22 @@ export function TokenSettings() {
   const [showToken, setShowToken] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const handleSave = () => {
-    if (inputValue.trim()) {
-      setToken(inputValue.trim());
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (nextOpen) {
+      setInputValue(token ?? '');
+    } else {
       setInputValue('');
-      setOpen(false);
+      setShowToken(false);
     }
+  };
+
+  const handleSave = () => {
+    const trimmed = inputValue.trim();
+    if (!trimmed) return;
+    setToken(trimmed);
+    setInputValue('');
+    setOpen(false);
   };
 
   const handleClear = () => {
@@ -36,7 +46,7 @@ export function TokenSettings() {
   const isTokenSet = !!token;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
@@ -70,8 +80,8 @@ export function TokenSettings() {
               repository info.
             </p>
             <p className="text-muted-foreground text-xs italic">
-              🔒 Your token is stored locally in your browser only and never
-              sent to our servers.
+              🔒 Stored securely in this browser session only and never sent to
+              our servers.
             </p>
           </div>
 

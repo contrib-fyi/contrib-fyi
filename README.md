@@ -4,9 +4,6 @@
     Find your next open source contribution on GitHub with ease.
 </div>
 
-
-
-
 ## Overview
 
 Contrib.FYI is a modern web application that helps developers discover good first issues and help wanted tasks across GitHub repositories. Built with Next.js and featuring a clean, intuitive interface, it makes finding meaningful open source contributions simple and efficient.
@@ -61,11 +58,13 @@ cd contrib-fyi/web
 npm install
 ```
 
-3. (Optional) Create a `.env.local` file for your GitHub token:
+3. (Optional) Configure environment variables:
 
 ```bash
 cp .env.local.example .env.local
-# Edit .env.local and add your token
+# NEXT_PUBLIC_BASE_PATH=/your/base/path
+# NEXT_OUTPUT_MODE=export
+# NEXT_PUBLIC_GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 4. Start the development server:
@@ -75,6 +74,15 @@ npm run dev
 ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### Available Scripts
+
+- `npm run dev` – start the development server
+- `npm run build` – create a production build
+- `npm run start` – serve the production build
+- `npm run lint` – run ESLint
+- `npm run format` – format with Prettier
+- `npm run typecheck` – run TypeScript without emitting files
 
 ### GitHub Personal Access Token
 
