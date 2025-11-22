@@ -161,9 +161,10 @@ export async function getRepository(
 
   // Add GitHub token if available (for higher rate limits)
   const token =
-    typeof window !== 'undefined'
+    options?.token ??
+    (typeof window !== 'undefined'
       ? localStorage.getItem('github_token')
-      : process.env.NEXT_PUBLIC_GITHUB_TOKEN;
+      : process.env.NEXT_PUBLIC_GITHUB_TOKEN);
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
