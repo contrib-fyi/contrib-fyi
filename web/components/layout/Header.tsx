@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -11,14 +10,16 @@ import { TokenSettings } from '@/components/features/auth/TokenSettings';
 export function Header() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
   return (
     <header className="border-b">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-            <Image
-              src="/logo.png"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${basePath}/logo.png`}
               alt="Contrib.fyi"
               width={40}
               height={40}
