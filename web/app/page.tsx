@@ -6,8 +6,15 @@ export default function Home() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Find Issues</h1>
-        <p className="text-muted-foreground">
-          Discover &quot;Help Wanted&quot; and &quot;Good First Issue&quot;
+        <p className="text-muted-foreground text-lg">
+          Discover{' '}
+          <span className="bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text font-extrabold text-transparent dark:from-blue-400 dark:to-cyan-300">
+            &quot;Help Wanted&quot;
+          </span>{' '}
+          and{' '}
+          <span className="bg-linear-to-r from-purple-600 to-pink-500 bg-clip-text font-extrabold text-transparent dark:from-purple-400 dark:to-pink-300">
+            &quot;Good First Issue&quot;
+          </span>{' '}
           tasks across GitHub.
         </p>
       </div>
