@@ -18,6 +18,7 @@ import { GitHubRepository } from '@/lib/github/client';
 import { useState, useEffect, useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRepositoryWithCache } from '@/lib/github/repositoryCache';
+import { GitHubRateLimitError } from '@/lib/github/client';
 import { IssueSnapshot } from '@/lib/github/issueSnapshot';
 import { useTokenStore } from '@/lib/store/useTokenStore';
 import { parseRepoFromIssueUrl } from '@/lib/github/urlParser';
@@ -63,6 +64,12 @@ export function IssueRow({ issue }: IssueRowProps) {
       .catch((err) => {
         if (controller.signal.aborted) return;
         if (err instanceof DOMException && err.name === 'AbortError') return;
+        if (err instanceof GitHubRateLimitError) {
+          console.warn(
+            'GitHub rate limit reached while loading repository details; showing issue without repo metadata.'
+          );
+          return;
+        }
         console.error('Failed to fetch repository info:', err);
       });
 

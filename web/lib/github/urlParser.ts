@@ -13,6 +13,8 @@ export function parseRepoFromIssueUrl(
       .split('/issues')[0];
     const [owner, repo] = repoPath.split('/');
     if (!owner || !repo) return null;
+    // Ensure the URL actually points to an issue path
+    if (!issueUrl.includes('/issues/')) return null;
     return { owner, repo, fullName: `${owner}/${repo}` };
   } catch {
     return null;
