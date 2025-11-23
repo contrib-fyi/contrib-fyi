@@ -103,7 +103,8 @@ export function TokenSettings() {
                   Additional Features with Token
                 </p>
                 <p className="text-muted-foreground mt-0.5 text-xs">
-                  • Repository star counts <br /> • Filter by minimum stars <br /> • Linked pull request counts
+                  • Repository star counts <br /> • Filter by minimum stars{' '}
+                  <br /> • Linked pull request counts
                 </p>
               </div>
             </div>
