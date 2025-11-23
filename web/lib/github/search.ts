@@ -2,14 +2,12 @@ import {
   searchIssues,
   SearchIssuesResponse,
   GitHubIssue,
-  GitHubRateLimitError,
 } from '@/lib/github/client';
 import { IssueSnapshot } from '@/lib/github/issueSnapshot';
-import { getRepositoryWithCache } from '@/lib/github/repositoryCache';
 import { fetchLinkedPRCounts } from '@/lib/github/graphql';
 import { GITHUB_API, SEARCH_CONFIG } from '@/lib/constants/github';
-import { parseRepoFromIssueUrl } from '@/lib/github/urlParser';
 import { IssueTransformer } from '@/lib/github/transformers/IssueTransformer';
+import { repositoryService } from '@/lib/github/services/RepositoryService';
 
 interface SearchFilters {
   language: string[];
@@ -168,35 +166,11 @@ export async function searchIssuesWithFilters(
     }
 
     // Fetch repo info
-    const issuesWithRepo = await Promise.all(
-      res.items.map(async (issue) => {
-        const snapshot = IssueTransformer.toSnapshots([issue])[0];
-        const repoInfo = parseRepoFromIssueUrl(issue.html_url);
-
-        if (!repoInfo) return snapshot;
-
-        try {
-          const repository = await getRepositoryWithCache(
-            repoInfo.owner,
-            repoInfo.repo,
-            {
-              signal: options.signal,
-              token: options.token,
-            }
-          );
-          return { ...snapshot, repository };
-        } catch (err) {
-          if (err instanceof GitHubRateLimitError) {
-            console.warn(
-              'GitHub rate limit hit while enriching repository info; skipping.'
-            );
-            return snapshot;
-          }
-          console.error('Failed to fetch repository info:', err);
-          return snapshot;
-        }
-      })
-    );
+    const snapshots = IssueTransformer.toSnapshots(res.items);
+    const issuesWithRepo = await repositoryService.enrichSnapshots(snapshots, {
+      signal: options.signal,
+      token: options.token,
+    });
 
     if (options.signal?.aborted) break;
 
