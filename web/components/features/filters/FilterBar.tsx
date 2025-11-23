@@ -114,6 +114,10 @@ export function FilterBar() {
   };
 
   const handleAdvancedApply = () => {
+    setLanguage(localLanguage);
+    setLabel(localLabel);
+    setSort(localSort);
+    setSearchQuery(localSearchQuery);
     setOnlyNoComments(pendingOnlyNoComments);
     setMinStars(pendingMinStars === '' ? null : Number(pendingMinStars));
     setAdvancedOpen(false);
