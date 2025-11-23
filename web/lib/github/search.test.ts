@@ -159,6 +159,37 @@ describe('GitHub Search', () => {
       expect(result.items.length).toBeLessThanOrEqual(20);
     });
 
+    it('should request per_page=20 in search params', async () => {
+      let perPageParam: string | null = null;
+
+      server.use(
+        http.get('https://api.github.com/search/issues', ({ request }) => {
+          const url = new URL(request.url);
+          perPageParam = url.searchParams.get('per_page');
+          return HttpResponse.json({
+            total_count: 1,
+            incomplete_results: false,
+            items: [mockIssue],
+          });
+        })
+      );
+
+      await searchIssuesWithFilters(
+        {
+          language: [],
+          label: [],
+          sort: 'created',
+          searchQuery: '',
+          onlyNoComments: false,
+          minStars: null,
+        },
+        1,
+        {}
+      );
+
+      expect(perPageParam).toBe('20');
+    });
+
     it('should surface rate limit errors from GitHub', async () => {
       server.use(
         http.get('https://api.github.com/search/issues', () =>

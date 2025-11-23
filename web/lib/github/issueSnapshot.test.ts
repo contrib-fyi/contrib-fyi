@@ -190,4 +190,17 @@ describe('toIssueSnapshot', () => {
     expect(snapshot.comments).toBe(mockIssue.comments);
     expect(snapshot.state).toBe(mockIssue.state);
   });
+
+  it('should drop unknown fields like linked_pr_count', () => {
+    const issueWithLinkedPRs = {
+      ...mockIssue,
+      linked_pr_count: 7,
+    } as unknown as GitHubIssue;
+
+    const snapshot = toIssueSnapshot(issueWithLinkedPRs);
+
+    expect((snapshot as { linked_pr_count?: number }).linked_pr_count).toBe(
+      undefined
+    );
+  });
 });
