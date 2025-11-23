@@ -44,7 +44,9 @@ describe('RepositoryService', () => {
   });
 
   it('filters by minStars using repository data', async () => {
-    getRepositoryWithCache.mockResolvedValue(mockIssueWithHighStars.repository!);
+    getRepositoryWithCache.mockResolvedValue(
+      mockIssueWithHighStars.repository!
+    );
     const snapshots = IssueTransformer.toSnapshots([
       { ...mockIssue, repository: undefined },
     ]);
