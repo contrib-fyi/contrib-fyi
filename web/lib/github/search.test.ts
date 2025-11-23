@@ -245,7 +245,7 @@ describe('GitHub Search', () => {
             full_name: `${owner}/test`,
             stargazers_count: starCount,
           });
-        }),
+        })
       );
 
       const result = await searchIssuesWithFilters(
@@ -258,7 +258,7 @@ describe('GitHub Search', () => {
           minStars: 500,
         },
         1,
-        { token: 'test-token' },
+        { token: 'test-token' }
       );
 
       // Should have 10 high star issues (targetCount), limited to 20 in final output

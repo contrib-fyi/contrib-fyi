@@ -212,7 +212,7 @@ describe('useIssueSearch', () => {
         requestCount++;
         await new Promise((resolve) => setTimeout(resolve, 50));
         return HttpResponse.json(mockSearchResponse);
-      }),
+      })
     );
 
     const { result } = renderHook(() => useIssueSearch());
