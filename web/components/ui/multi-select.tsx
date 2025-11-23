@@ -45,6 +45,8 @@ export function MultiSelect({
   const [internalSelected, setInternalSelected] =
     React.useState<string[]>(selected);
 
+  const [inputValue, setInputValue] = React.useState('');
+
   // Sync internal state when external selected changes
   React.useEffect(() => {
     setInternalSelected(selected);
@@ -74,6 +76,7 @@ export function MultiSelect({
       ? internalSelected.filter((item) => item !== value)
       : [...internalSelected, value];
     setInternalSelected(newSelected);
+    setInputValue('');
   };
 
   return (
@@ -130,7 +133,11 @@ export function MultiSelect({
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
         <Command>
-          <CommandInput placeholder="Search..." />
+          <CommandInput
+            placeholder="Search..."
+            value={inputValue}
+            onValueChange={setInputValue}
+          />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup className="max-h-64 overflow-auto">
