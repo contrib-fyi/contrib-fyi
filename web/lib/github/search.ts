@@ -5,6 +5,7 @@ import {
 } from '@/lib/github/client';
 import { IssueSnapshot, toIssueSnapshot } from '@/lib/github/issueSnapshot';
 import { getRepositoryWithCache } from '@/lib/github/repositoryCache';
+import { fetchLinkedPRCounts } from '@/lib/github/graphql';
 
 interface SearchFilters {
   language: string[];
@@ -128,9 +129,26 @@ export async function searchIssuesWithFilters(
     // If we got more than 20 items due to parallel fetch, slice it to keep UI consistent?
     // Or just show them all? Showing more is probably fine/better.
     // Let's slice to 20 to keep page size consistent.
+    const slicedSnapshots = snapshots.slice(0, 20);
+
+    // Fetch linked PR counts if token is available
+    if (options.token) {
+      const prCounts = await fetchLinkedPRCounts(
+        res.items.slice(0, 20),
+        options.token,
+        options.signal
+      );
+      slicedSnapshots.forEach((snapshot) => {
+        const count = prCounts.get(snapshot.id);
+        if (count !== undefined) {
+          snapshot.linked_pr_count = count;
+        }
+      });
+    }
+
     return {
       ...res,
-      items: snapshots.slice(0, 20),
+      items: slicedSnapshots,
     };
   }
 
@@ -190,9 +208,36 @@ export async function searchIssuesWithFilters(
     currentPage++;
   }
 
+  const finalItems = allFilteredIssues.slice(0, 20);
+
+  // Fetch linked PR counts if token is available
+  if (options.token && finalItems.length > 0) {
+    // We need the original GitHubIssue objects to pass to fetchLinkedPRCounts
+    // But we only have IssueSnapshot here. We need to reconstruct or store the original issues.
+    // Actually, we can use the node_id from IssueSnapshot to query GraphQL.
+    // Let's create a minimal GitHubIssue-like object for the GraphQL function.
+    const issuesForGraphQL = finalItems.map((snapshot) => ({
+      id: snapshot.id,
+      node_id: snapshot.node_id,
+    })) as GitHubIssue[];
+
+    const prCounts = await fetchLinkedPRCounts(
+      issuesForGraphQL,
+      options.token,
+      options.signal
+    );
+
+    finalItems.forEach((snapshot) => {
+      const count = prCounts.get(snapshot.id);
+      if (count !== undefined) {
+        snapshot.linked_pr_count = count;
+      }
+    });
+  }
+
   return {
     total_count: totalCount,
     incomplete_results: false,
-    items: allFilteredIssues.slice(0, 20),
+    items: finalItems,
   };
 }
