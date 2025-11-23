@@ -30,6 +30,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+  SheetClose,
+} from '@/components/ui/sheet';
 
 export function FilterBar() {
   const {
@@ -146,15 +156,172 @@ export function FilterBar() {
   return (
     <div className="space-y-4 border-b p-4">
       <div className="space-y-4">
-        <div className="space-y-3">
-          <Input
-            placeholder="Search issues..."
-            value={localSearchQuery}
-            onChange={(e) => setLocalSearchQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="w-full lg:max-w-lg"
-          />
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col gap-4 md:space-y-3">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Search issues..."
+              value={localSearchQuery}
+              onChange={(e) => setLocalSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-full md:max-w-lg"
+            />
+            {/* Mobile Filter Button */}
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <SlidersHorizontal className="h-4 w-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side="right"
+                  className="w-full overflow-y-auto sm:max-w-md"
+                >
+                  <SheetHeader>
+                    <SheetTitle>Filters</SheetTitle>
+                    <SheetDescription>
+                      Refine your search results.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-6">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Language</label>
+                        <MultiSelect
+                          options={[
+                            { label: 'C', value: 'c' },
+                            { label: 'C++', value: 'c++' },
+                            { label: 'C#', value: 'c#' },
+                            { label: 'Clojure', value: 'clojure' },
+                            { label: 'CMake', value: 'cmake' },
+                            { label: 'CSS', value: 'css' },
+                            { label: 'Dart', value: 'dart' },
+                            { label: 'Dockerfile', value: 'dockerfile' },
+                            { label: 'Elixir', value: 'elixir' },
+                            { label: 'Emacs Lisp', value: 'emacs lisp' },
+                            { label: 'Erlang', value: 'erlang' },
+                            { label: 'F#', value: 'f#' },
+                            { label: 'Go', value: 'go' },
+                            { label: 'Groovy', value: 'groovy' },
+                            { label: 'Haskell', value: 'haskell' },
+                            { label: 'HCL', value: 'hcl' },
+                            { label: 'HTML', value: 'html' },
+                            { label: 'Java', value: 'java' },
+                            { label: 'JavaScript', value: 'javascript' },
+                            { label: 'Jinja', value: 'jinja' },
+                            { label: 'JSON', value: 'json' },
+                            { label: 'Kotlin', value: 'kotlin' },
+                            { label: 'Lua', value: 'lua' },
+                            { label: 'Makefile', value: 'makefile' },
+                            { label: 'Nix', value: 'nix' },
+                            { label: 'Objective-C', value: 'objective-c' },
+                            { label: 'OCaml', value: 'ocaml' },
+                            { label: 'Perl', value: 'perl' },
+                            { label: 'PHP', value: 'php' },
+                            { label: 'PowerShell', value: 'powershell' },
+                            { label: 'Python', value: 'python' },
+                            { label: 'R', value: 'r' },
+                            { label: 'Ruby', value: 'ruby' },
+                            { label: 'Rust', value: 'rust' },
+                            { label: 'Scala', value: 'scala' },
+                            { label: 'SCSS', value: 'scss' },
+                            { label: 'Shell', value: 'shell' },
+                            { label: 'SQL', value: 'sql' },
+                            { label: 'Svelte', value: 'svelte' },
+                            { label: 'Swift', value: 'swift' },
+                            { label: 'TypeScript', value: 'typescript' },
+                            { label: 'Vim Script', value: 'vim script' },
+                            { label: 'Vue', value: 'vue' },
+                            { label: 'YAML', value: 'yaml' },
+                            { label: 'Zig', value: 'zig' },
+                          ]}
+                          selected={localLanguage}
+                          onChange={setLocalLanguage}
+                          placeholder="Select languages"
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Label</label>
+                        <MultiSelect
+                          options={[
+                            { label: 'help wanted', value: 'help wanted' },
+                            {
+                              label: 'good first issue',
+                              value: 'good first issue',
+                            },
+                            { label: 'documentation', value: 'documentation' },
+                            { label: 'enhancement', value: 'enhancement' },
+                            { label: 'bug', value: 'bug' },
+                          ]}
+                          selected={localLabel}
+                          onChange={setLocalLabel}
+                          placeholder="Select labels"
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Sort by</label>
+                        <Select
+                          value={localSort}
+                          onValueChange={(val) =>
+                            setLocalSort(
+                              val as 'created' | 'updated' | 'comments'
+                            )
+                          }
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Sort by" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="created">Newest</SelectItem>
+                            <SelectItem value="updated">
+                              Recently Updated
+                            </SelectItem>
+                            <SelectItem value="comments">
+                              Most Commented
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between rounded-lg border p-3">
+                          <div className="space-y-0.5">
+                            <label className="text-sm font-medium">
+                              No comments
+                            </label>
+                            <p className="text-muted-foreground text-xs">
+                              Only show issues with 0 comments
+                            </p>
+                          </div>
+                          <Switch
+                            checked={pendingOnlyNoComments}
+                            onCheckedChange={setPendingOnlyNoComments}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <SheetFooter>
+                      <SheetClose asChild>
+                        <Button
+                          onClick={() => {
+                            handleAdvancedApply(); // Apply advanced filters (no comments)
+                            handleSearch(); // Apply main filters
+                          }}
+                          className="w-full"
+                        >
+                          Show results
+                        </Button>
+                      </SheetClose>
+                    </SheetFooter>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+
+          {/* Desktop Filters */}
+          <div className="hidden gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -274,7 +441,9 @@ export function FilterBar() {
             </TooltipProvider>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+
+        {/* Desktop Buttons */}
+        <div className="hidden flex-wrap items-center gap-2 md:flex">
           <Dialog open={advancedOpen} onOpenChange={handleAdvancedOpenChange}>
             <DialogTrigger asChild>
               <Button

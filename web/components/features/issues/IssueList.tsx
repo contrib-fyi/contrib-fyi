@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useFilterStore } from '@/lib/store/useFilterStore';
 import { searchIssues, SearchIssuesResponse } from '@/lib/github/client';
 import { IssueRow } from './IssueRow';
-import { Skeleton } from '@/components/ui/skeleton';
+import { IssueRowSkeleton } from './IssueRowSkeleton';
+import { EmptyState } from './EmptyState';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTokenStore } from '@/lib/store/useTokenStore';
@@ -27,7 +28,7 @@ const buildLabelQuery = (labels: string[]) => {
 };
 
 export function IssueList() {
-  const { language, label, sort, searchQuery, onlyNoComments } =
+  const { language, label, sort, searchQuery, onlyNoComments, resetFilters } =
     useFilterStore();
   const token = useTokenStore((state) => state.token);
   const [data, setData] = useState<SearchIssuesResponse<IssueSnapshot> | null>(
@@ -154,32 +155,19 @@ export function IssueList() {
     return (
       <div className="space-y-4 p-4">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex flex-col gap-2 rounded-lg border p-4">
-            <div className="flex justify-between">
-              <div className="w-3/4 space-y-2">
-                <Skeleton className="h-6 w-1/2" />
-                <Skeleton className="h-4 w-1/3" />
-              </div>
-              <Skeleton className="h-9 w-20" />
-            </div>
-            <div className="mt-2 flex gap-2">
-              <Skeleton className="h-5 w-16" />
-              <Skeleton className="h-5 w-16" />
-            </div>
-          </div>
+          <IssueRowSkeleton key={i} />
         ))}
       </div>
     );
   }
 
+  const handleReset = () => {
+    resetFilters();
+    setRefreshKey((key) => key + 1);
+  };
+
   if (!data || data.items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-center">
-        <p className="text-muted-foreground">
-          No issues found matching your criteria.
-        </p>
-      </div>
-    );
+    return <EmptyState onReset={handleReset} />;
   }
 
   return (

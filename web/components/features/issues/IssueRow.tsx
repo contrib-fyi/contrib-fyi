@@ -83,7 +83,7 @@ export function IssueRow({ issue }: IssueRowProps) {
   };
 
   return (
-    <div className="group hover:bg-muted/50 flex flex-col gap-2 rounded-lg border p-4 transition-colors">
+    <div className="group hover:bg-muted/50 flex flex-col gap-2 rounded-lg border p-4 transition-all duration-200 hover:scale-[1.01] hover:shadow-md active:scale-[0.99]">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-1 gap-3">
           {/* User Avatar */}
