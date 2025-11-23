@@ -33,6 +33,7 @@ export interface IssueSnapshot {
   created_at: string;
   updated_at: string;
   repository?: GitHubIssue['repository'];
+  linked_pr_count?: number;
 }
 
 export function toIssueSnapshot(issue: GitHubIssue): IssueSnapshot {

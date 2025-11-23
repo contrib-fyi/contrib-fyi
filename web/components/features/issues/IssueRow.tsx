@@ -8,6 +8,7 @@ import {
   Clock,
   Bookmark,
   ExternalLink,
+  GitPullRequest,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { usePickStore } from '@/lib/store/usePickStore';
@@ -178,6 +179,12 @@ export function IssueRow({ issue }: IssueRowProps) {
               <span className="flex items-center gap-1">
                 <Star className="h-3 w-3" />
                 {repository.stargazers_count.toLocaleString()}
+              </span>
+            )}
+            {issue.linked_pr_count !== undefined && (
+              <span className="flex items-center gap-1">
+                <GitPullRequest className="h-3 w-3" />
+                {issue.linked_pr_count}
               </span>
             )}
             <span className="flex items-center gap-1">
