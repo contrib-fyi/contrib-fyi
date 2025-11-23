@@ -1,3 +1,5 @@
+import { TokenService } from '@/lib/services/TokenService';
+
 export interface GitHubIssue {
   id: number;
   node_id: string;
@@ -123,11 +125,7 @@ export async function searchIssues(
   };
 
   // Add GitHub token if available (for higher rate limits)
-  const token =
-    options?.token ??
-    (typeof window !== 'undefined'
-      ? localStorage.getItem('github_token')
-      : process.env.NEXT_PUBLIC_GITHUB_TOKEN);
+  const token = options?.token ?? TokenService.getInstance().getToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -160,11 +158,7 @@ export async function getRepository(
   };
 
   // Add GitHub token if available (for higher rate limits)
-  const token =
-    options?.token ??
-    (typeof window !== 'undefined'
-      ? localStorage.getItem('github_token')
-      : process.env.NEXT_PUBLIC_GITHUB_TOKEN);
+  const token = options?.token ?? TokenService.getInstance().getToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }

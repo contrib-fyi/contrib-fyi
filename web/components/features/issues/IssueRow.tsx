@@ -15,11 +15,12 @@ import { usePickStore } from '@/lib/store/usePickStore';
 import { useHistoryStore } from '@/lib/store/useHistoryStore';
 import { IssueDetailModal } from './IssueDetailModal';
 import { GitHubRepository } from '@/lib/github/client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRepositoryWithCache } from '@/lib/github/repositoryCache';
 import { IssueSnapshot } from '@/lib/github/issueSnapshot';
 import { useTokenStore } from '@/lib/store/useTokenStore';
+import { parseRepoFromIssueUrl } from '@/lib/github/urlParser';
 
 interface IssueRowProps {
   issue: IssueSnapshot;
@@ -36,20 +37,21 @@ export function IssueRow({ issue }: IssueRowProps) {
 
   // Extract owner and repo from html_url or repository_url
   // html_url: https://github.com/owner/repo/issues/123
-  const repoPath = issue.html_url
-    .replace('https://github.com/', '')
-    .split('/issues')[0];
-  const [owner, repo] = repoPath.split('/');
+  const repoInfo = useMemo(
+    () => parseRepoFromIssueUrl(issue.html_url),
+    [issue.html_url]
+  );
+  const repoPath = repoInfo ? repoInfo.fullName : issue.html_url;
 
   // Fetch repository info if not already available
   useEffect(() => {
-    if (issue.repository || !owner || !repo) {
+    if (issue.repository || !repoInfo) {
       return;
     }
 
     const controller = new AbortController();
 
-    getRepositoryWithCache(owner, repo, {
+    getRepositoryWithCache(repoInfo.owner, repoInfo.repo, {
       signal: controller.signal,
       token,
     })
@@ -67,7 +69,7 @@ export function IssueRow({ issue }: IssueRowProps) {
     return () => {
       controller.abort();
     };
-  }, [issue.repository, owner, repo, token]);
+  }, [issue.repository, repoInfo, token]);
 
   const handlePickToggle = (e: React.MouseEvent) => {
     e.preventDefault();

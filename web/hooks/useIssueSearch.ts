@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useFilterStore } from '@/lib/store/useFilterStore';
 import { useTokenStore } from '@/lib/store/useTokenStore';
 import { SearchIssuesResponse } from '@/lib/github/client';
+import { GITHUB_API } from '@/lib/constants/github';
 import { IssueSnapshot } from '@/lib/github/issueSnapshot';
 import { searchIssuesWithFilters } from '@/lib/github/search';
 
@@ -91,9 +92,11 @@ export function useIssueSearch() {
 
   const totalPages = useMemo(() => {
     if (!data) return 1;
-    const MAX_RESULTS = 1000; // GitHub search API caps results at 1000
-    const totalResults = Math.min(data.total_count, MAX_RESULTS);
-    return Math.max(1, Math.ceil(totalResults / 20));
+    const totalResults = Math.min(
+      data.total_count,
+      GITHUB_API.MAX_SEARCH_RESULTS
+    );
+    return Math.max(1, Math.ceil(totalResults / GITHUB_API.DEFAULT_PAGE_SIZE));
   }, [data]);
 
   const refresh = () => {
