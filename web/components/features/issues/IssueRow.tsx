@@ -101,7 +101,7 @@ export function IssueRow({ issue }: IssueRowProps) {
               <IssueDetailModal issue={issue}>
                 <button
                   onClick={handleView}
-                  className="text-left text-lg font-semibold hover:underline"
+                  className="line-clamp-2 min-w-0 text-left text-lg font-semibold break-all hover:underline"
                 >
                   {issue.title}
                 </button>
@@ -122,7 +122,7 @@ export function IssueRow({ issue }: IssueRowProps) {
                 href={`https://github.com/${repoPath}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-foreground font-medium hover:underline"
+                className="text-foreground inline-block max-w-[200px] truncate align-bottom font-medium hover:underline sm:max-w-[300px]"
               >
                 {repoPath}
               </a>
