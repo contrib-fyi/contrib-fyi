@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="web/app/logo.png" alt="Contrib.FYI Logo" width="120" height="120">
+  <img src="web/app/logo.png" alt="Contrib.FYI Logo" width="150" height="150">
   <h1>Contrib.FYI</h1>
     Find your next open source contribution on GitHub with ease.
   <br><br>
