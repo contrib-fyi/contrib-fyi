@@ -6,6 +6,8 @@ import {
 import { IssueSnapshot, toIssueSnapshot } from '@/lib/github/issueSnapshot';
 import { getRepositoryWithCache } from '@/lib/github/repositoryCache';
 import { fetchLinkedPRCounts } from '@/lib/github/graphql';
+import { GITHUB_API, SEARCH_CONFIG } from '@/lib/constants/github';
+import { parseRepoFromIssueUrl } from '@/lib/github/urlParser';
 
 interface SearchFilters {
   language: string[];
@@ -60,7 +62,7 @@ async function fetchRawIssues(
         q,
         sort,
         order: 'desc',
-        per_page: 20,
+        per_page: GITHUB_API.DEFAULT_PAGE_SIZE,
         page,
       },
       options
@@ -156,8 +158,8 @@ export async function searchIssuesWithFilters(
   let allFilteredIssues: IssueSnapshot[] = [];
   let currentPage = page;
   let totalCount = 0;
-  const maxAttempts = 3;
-  const targetCount = 10;
+  const maxAttempts = SEARCH_CONFIG.STAR_FILTER_MAX_ATTEMPTS;
+  const targetCount = SEARCH_CONFIG.STAR_FILTER_TARGET_COUNT;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const res = await fetchRawIssues(filters, currentPage, options);
@@ -172,18 +174,19 @@ export async function searchIssuesWithFilters(
     const issuesWithRepo = await Promise.all(
       res.items.map(async (issue) => {
         const snapshot = toIssueSnapshot(issue);
-        const repoPath = issue.html_url
-          .replace('https://github.com/', '')
-          .split('/issues')[0];
-        const [owner, repo] = repoPath.split('/');
+        const repoInfo = parseRepoFromIssueUrl(issue.html_url);
 
-        if (!owner || !repo) return snapshot;
+        if (!repoInfo) return snapshot;
 
         try {
-          const repository = await getRepositoryWithCache(owner, repo, {
-            signal: options.signal,
-            token: options.token,
-          });
+          const repository = await getRepositoryWithCache(
+            repoInfo.owner,
+            repoInfo.repo,
+            {
+              signal: options.signal,
+              token: options.token,
+            }
+          );
           return { ...snapshot, repository };
         } catch (err) {
           console.error('Failed to fetch repository info:', err);
