@@ -18,9 +18,9 @@
 
 There are many "Good First Issue" finders available today, but most rely on static lists of curated, popular repositories.
 
-I previously relied on [github-help-wanted](https://github.com/mac-s-g/github-help-wanted/), a fantastic tool that enabled dynamic searching of active issues across GitHub using custom queries.
+I previously relied on [github-help-wanted](https://github.com/mac-s-g/github-help-wanted/). What I loved most about it was the **thrill of discovery**—because it displayed issues in chronological order, I often stumbled upon unexpectedly wonderful projects that I would have otherwise missed.
 
-Contrib.FYI was built to carry forward that powerful **"Dynamic Search"** philosophy. It combines real-time GitHub API access with a modern interface, local issue tracking, and personal token integration to bypass rate limits—creating a robust discovery tool for today's open source contributors.
+Contrib.FYI was built to preserve this experience of **serendipitous discovery**. It carries forward the "Dynamic Search" philosophy by combining real-time GitHub API access with a modern interface. With local issue tracking and personal token integration, it creates a robust environment where you can find fresh, exciting opportunities in the open source world.
 
 ### Comparison
 
