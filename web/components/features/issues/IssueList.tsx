@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTokenStore } from '@/lib/store/useTokenStore';
 import { IssueSnapshot, toIssueSnapshot } from '@/lib/github/issueSnapshot';
+import { getRepositoryWithCache } from '@/lib/github/repositoryCache';
 
 const buildOrQuery = (
   values: string[],
@@ -28,7 +29,7 @@ const buildLabelQuery = (labels: string[]) => {
 };
 
 export function IssueList() {
-  const { language, label, sort, searchQuery, onlyNoComments, resetFilters } =
+  const { language, label, sort, searchQuery, onlyNoComments, minStars, resetFilters } =
     useFilterStore();
   const token = useTokenStore((state) => state.token);
   const [data, setData] = useState<SearchIssuesResponse<IssueSnapshot> | null>(
@@ -41,7 +42,7 @@ export function IssueList() {
 
   useEffect(() => {
     setPage(1); // Reset page when filters change
-  }, [language, label, sort, searchQuery, onlyNoComments]);
+  }, [language, label, sort, searchQuery, onlyNoComments, minStars]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -78,23 +79,112 @@ export function IssueList() {
 
         const q = qParts.join(' ');
 
-        const res = await searchIssues(
-          {
-            q,
-            sort,
-            order: 'desc',
-            per_page: 20,
-            page,
-          },
-          {
-            signal: controller.signal,
-            token,
-          }
-        );
+        // Intelligent pagination: fetch multiple pages if minStars filter is active
+        if (minStars !== null && minStars > 0) {
+          let allFilteredIssues: IssueSnapshot[] = [];
+          let currentPage = page;
+          let totalCount = 0;
+          const maxAttempts = 3; // Try up to 3 pages
+          const targetCount = 10; // Try to get at least 10 issues
 
-        if (!controller.signal.aborted && isSubscribed) {
-          const snapshots = res.items.map((item) => toIssueSnapshot(item));
-          setData({ ...res, items: snapshots });
+          for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            const res = await searchIssues(
+              {
+                q,
+                sort,
+                order: 'desc',
+                per_page: 20,
+                page: currentPage,
+              },
+              {
+                signal: controller.signal,
+                token,
+              }
+            );
+
+            if (controller.signal.aborted || !isSubscribed) return;
+
+            // Store total count from first response
+            if (attempt === 0) {
+              totalCount = res.total_count;
+            }
+
+            // Fetch repository info for all issues in parallel
+            const issuesWithRepo = await Promise.all(
+              res.items.map(async (issue) => {
+                const snapshot = toIssueSnapshot(issue);
+
+                // Extract owner and repo from html_url
+                const repoPath = issue.html_url
+                  .replace('https://github.com/', '')
+                  .split('/issues')[0];
+                const [owner, repo] = repoPath.split('/');
+
+                if (!owner || !repo) {
+                  return snapshot;
+                }
+
+                try {
+                  const repository = await getRepositoryWithCache(owner, repo, {
+                    signal: controller.signal,
+                    token,
+                  });
+                  return { ...snapshot, repository };
+                } catch (err) {
+                  // If we can't fetch repo info, include the issue without filtering
+                  console.error('Failed to fetch repository info:', err);
+                  return snapshot;
+                }
+              })
+            );
+
+            if (controller.signal.aborted || !isSubscribed) return;
+
+            // Filter by star count
+            const filtered = issuesWithRepo.filter((issue) => {
+              if (!issue.repository) return false; // Exclude if repo info is missing
+              return issue.repository.stargazers_count >= minStars;
+            });
+
+            allFilteredIssues = [...allFilteredIssues, ...filtered];
+
+            // Stop if we have enough results or no more items
+            if (allFilteredIssues.length >= targetCount || res.items.length === 0) {
+              break;
+            }
+
+            currentPage++;
+          }
+
+          if (!controller.signal.aborted && isSubscribed) {
+            // Return up to 20 issues
+            const finalIssues = allFilteredIssues.slice(0, 20);
+            setData({
+              total_count: totalCount,
+              incomplete_results: false,
+              items: finalIssues,
+            });
+          }
+        } else {
+          // No star filter: use original logic
+          const res = await searchIssues(
+            {
+              q,
+              sort,
+              order: 'desc',
+              per_page: 20,
+              page,
+            },
+            {
+              signal: controller.signal,
+              token,
+            }
+          );
+
+          if (!controller.signal.aborted && isSubscribed) {
+            const snapshots = res.items.map((item) => toIssueSnapshot(item));
+            setData({ ...res, items: snapshots });
+          }
         }
       } catch (err: unknown) {
         if (controller.signal.aborted || !isSubscribed) return;
@@ -123,6 +213,7 @@ export function IssueList() {
     sort,
     searchQuery,
     onlyNoComments,
+    minStars,
     page,
     token,
     refreshKey,

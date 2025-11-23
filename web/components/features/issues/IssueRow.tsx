@@ -12,7 +12,6 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { usePickStore } from '@/lib/store/usePickStore';
 import { useHistoryStore } from '@/lib/store/useHistoryStore';
-import { useFilterStore } from '@/lib/store/useFilterStore';
 import { IssueDetailModal } from './IssueDetailModal';
 import { GitHubRepository } from '@/lib/github/client';
 import { useState, useEffect } from 'react';
@@ -28,7 +27,6 @@ interface IssueRowProps {
 export function IssueRow({ issue }: IssueRowProps) {
   const { addPick, removePick, isPicked } = usePickStore();
   const { addToHistory } = useHistoryStore();
-  const { minStars } = useFilterStore();
   const token = useTokenStore((state) => state.token);
   const picked = isPicked(issue.id);
   const [repository, setRepository] = useState<GitHubRepository | null>(
@@ -83,15 +81,6 @@ export function IssueRow({ issue }: IssueRowProps) {
   const handleView = () => {
     addToHistory(issue);
   };
-
-  // Client-side filtering by stars
-  if (
-    minStars !== null &&
-    repository &&
-    repository.stargazers_count < minStars
-  ) {
-    return null;
-  }
 
   return (
     <div className="group hover:bg-muted/50 flex flex-col gap-2 rounded-lg border p-4 transition-all duration-200 hover:scale-[1.01] hover:shadow-md active:scale-[0.99]">
