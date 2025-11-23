@@ -84,7 +84,7 @@ export function IssueRow({ issue }: IssueRowProps) {
 
   return (
     <div className="group hover:bg-muted/50 flex flex-col gap-2 rounded-lg border p-4 transition-colors">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-1 gap-3">
           {/* User Avatar */}
           <Avatar className="h-10 w-10 shrink-0">
@@ -171,7 +171,7 @@ export function IssueRow({ issue }: IssueRowProps) {
         </div>
 
         {/* Right side: Stats and Pick button */}
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex w-full flex-row items-center justify-between gap-2 sm:w-auto sm:flex-col sm:items-end">
           {/* Stats */}
           <div className="text-muted-foreground flex items-center gap-3 text-sm">
             {repository && (
