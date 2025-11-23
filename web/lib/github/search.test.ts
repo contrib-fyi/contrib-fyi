@@ -158,6 +158,60 @@ describe('GitHub Search', () => {
 
       expect(result.items.length).toBeLessThanOrEqual(20);
     });
+
+    it('should surface rate limit errors from GitHub', async () => {
+      server.use(
+        http.get('https://api.github.com/search/issues', () =>
+          HttpResponse.json(
+            { message: 'API rate limit exceeded' },
+            { status: 403 }
+          )
+        )
+      );
+
+      await expect(
+        searchIssuesWithFilters(
+          {
+            language: [],
+            label: [],
+            sort: 'created',
+            searchQuery: '',
+            onlyNoComments: false,
+            minStars: null,
+          },
+          1,
+          {}
+        )
+      ).rejects.toThrow('Rate Limit Exceeded');
+    });
+
+    it('should return empty items when search has zero results', async () => {
+      server.use(
+        http.get('https://api.github.com/search/issues', () =>
+          HttpResponse.json({
+            total_count: 0,
+            incomplete_results: false,
+            items: [],
+          })
+        )
+      );
+
+      const result = await searchIssuesWithFilters(
+        {
+          language: [],
+          label: [],
+          sort: 'created',
+          searchQuery: 'no-match-query',
+          onlyNoComments: false,
+          minStars: null,
+        },
+        1,
+        {}
+      );
+
+      expect(result.total_count).toBe(0);
+      expect(result.items).toHaveLength(0);
+    });
   });
 
   describe('searchIssuesWithFilters - multi-language search', () => {

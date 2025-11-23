@@ -173,4 +173,21 @@ describe('toIssueSnapshot', () => {
     expect(snapshot.repository?.description).toBeNull();
     expect(snapshot.repository?.language).toBeNull();
   });
+
+  it('should map user fields correctly', () => {
+    const snapshot = toIssueSnapshot(mockIssue);
+
+    expect(snapshot.user).toEqual({
+      login: mockIssue.user.login,
+      id: mockIssue.user.id,
+      avatar_url: mockIssue.user.avatar_url,
+      html_url: mockIssue.user.html_url,
+    });
+  });
+
+  it('should preserve comments count and state', () => {
+    const snapshot = toIssueSnapshot(mockIssue);
+    expect(snapshot.comments).toBe(mockIssue.comments);
+    expect(snapshot.state).toBe(mockIssue.state);
+  });
 });
