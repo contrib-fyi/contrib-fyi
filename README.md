@@ -50,6 +50,13 @@ Freely combine filters for programming languages, labels (e.g., "help wanted", "
 You can configure your own GitHub Personal Access Token (PAT) to increase API rate limits from 60 to 5,000 requests per hour.
 **Privacy First:** Your token is stored strictly in your browser's `localStorage` and is never sent to any external server.
 
+#### Additional Features with Token
+
+- Repository Star Count
+  - See how popular each repository is at a glance
+- Star Filtering
+  - Filter issues by minimum repository stars to focus on well-established projects
+
 ### 🔖 My Picks
 
 Save interesting issues to your local "My Picks" list to review and tackle later.
