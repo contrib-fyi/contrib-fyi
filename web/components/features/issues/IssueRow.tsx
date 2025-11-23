@@ -175,7 +175,7 @@ export function IssueRow({ issue }: IssueRowProps) {
         <div className="flex w-full flex-row items-center justify-between gap-2 sm:w-auto sm:flex-col sm:items-end">
           {/* Stats */}
           <div className="text-muted-foreground flex items-center gap-3 text-sm">
-            {repository && (
+            {repository && token && (
               <span className="flex items-center gap-1">
                 <Star className="h-3 w-3" />
                 {repository.stargazers_count.toLocaleString()}
