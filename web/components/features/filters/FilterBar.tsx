@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useFilterStore } from '@/lib/store/useFilterStore';
+import { useTokenStore } from '@/lib/store/useTokenStore';
 import { X, Search, SlidersHorizontal } from 'lucide-react';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Switch } from '@/components/ui/switch';
@@ -48,13 +49,17 @@ export function FilterBar() {
     sort: appliedSort,
     searchQuery: appliedSearchQuery,
     onlyNoComments: appliedOnlyNoComments,
+    minStars: appliedMinStars,
     setLanguage,
     setLabel,
     setSort,
     setSearchQuery,
     setOnlyNoComments,
+    setMinStars,
     resetFilters,
   } = useFilterStore();
+
+  const token = useTokenStore((state) => state.token);
 
   // Local state for pending filter changes
   const [localLanguage, setLocalLanguage] = useState<string[]>(appliedLanguage);
@@ -66,6 +71,9 @@ export function FilterBar() {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [pendingOnlyNoComments, setPendingOnlyNoComments] = useState(
     appliedOnlyNoComments
+  );
+  const [pendingMinStars, setPendingMinStars] = useState<number | ''>(
+    appliedMinStars ?? ''
   );
 
   // Sync local state when applied filters change (e.g., from reset)
@@ -95,6 +103,7 @@ export function FilterBar() {
     setLocalLabel(['help wanted']);
     setLocalSort('created');
     setLocalSearchQuery('');
+    setPendingMinStars('');
   };
 
   // Handle Enter key in search input
@@ -106,6 +115,7 @@ export function FilterBar() {
 
   const handleAdvancedApply = () => {
     setOnlyNoComments(pendingOnlyNoComments);
+    setMinStars(pendingMinStars === '' ? null : Number(pendingMinStars));
     setAdvancedOpen(false);
   };
 
@@ -113,6 +123,7 @@ export function FilterBar() {
     setAdvancedOpen(open);
     if (open) {
       setPendingOnlyNoComments(appliedOnlyNoComments);
+      setPendingMinStars(appliedMinStars ?? '');
     }
   };
 
@@ -146,6 +157,15 @@ export function FilterBar() {
             key: 'no-comments',
             label: 'No comments',
             onRemove: () => setOnlyNoComments(false),
+          },
+        ]
+      : []),
+    ...(appliedMinStars
+      ? [
+          {
+            key: 'min-stars',
+            label: `Min Stars: ${appliedMinStars}`,
+            onRemove: () => setMinStars(null),
           },
         ]
       : []),
@@ -185,6 +205,7 @@ export function FilterBar() {
                   </SheetHeader>
                   <div className="mt-6 space-y-6">
                     <div className="space-y-4">
+                      {/* ... (existing filters) ... */}
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Language</label>
                         <MultiSelect
@@ -300,6 +321,30 @@ export function FilterBar() {
                           />
                         </div>
                       </div>
+                      {token && (
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            Minimum Stars
+                          </label>
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder="e.g. 100"
+                            value={pendingMinStars}
+                            onChange={(e) =>
+                              setPendingMinStars(
+                                e.target.value === ''
+                                  ? ''
+                                  : Number(e.target.value)
+                              )
+                            }
+                          />
+                          <p className="text-muted-foreground text-xs">
+                            Only show issues from repositories with at least
+                            this many stars.
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <SheetFooter>
                       <SheetClose asChild>
@@ -448,7 +493,11 @@ export function FilterBar() {
             <DialogTrigger asChild>
               <Button
                 type="button"
-                variant={appliedOnlyNoComments ? 'secondary' : 'outline'}
+                variant={
+                  appliedOnlyNoComments || appliedMinStars
+                    ? 'secondary'
+                    : 'outline'
+                }
                 size="sm"
                 className="flex items-center gap-2"
               >
@@ -482,6 +531,31 @@ export function FilterBar() {
                     />
                   </div>
                 </div>
+                {token && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Stars</p>
+                    <div className="space-y-2 rounded-lg border p-3">
+                      <label className="text-sm font-medium">
+                        Minimum Stars
+                      </label>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="e.g. 100"
+                        value={pendingMinStars}
+                        onChange={(e) =>
+                          setPendingMinStars(
+                            e.target.value === '' ? '' : Number(e.target.value)
+                          )
+                        }
+                      />
+                      <p className="text-muted-foreground text-xs">
+                        Only show issues from repositories with at least this
+                        many stars.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
               <DialogFooter>
                 <Button
