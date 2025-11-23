@@ -10,11 +10,8 @@
 
 <div align="center">
   <h3>
-    <a href="https://contrib-fyi.github.io/contrib-fyi/">Visit the Web App</a>
+    <a href="https://contrib-fyi.github.io/contrib-fyi/"> 👉 Visit the Web App</a>
   </h3>
-  <a href="https://contrib-fyi.github.io/contrib-fyi/">
-    <img src="docs/screenshot.png" alt="Contrib.FYI Screenshot" width="800">
-  </a>
 </div>
 
 ## Why Contrib.FYI?
