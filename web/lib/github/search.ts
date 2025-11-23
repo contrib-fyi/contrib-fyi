@@ -2,12 +2,14 @@ import {
   searchIssues,
   SearchIssuesResponse,
   GitHubIssue,
+  GitHubRateLimitError,
 } from '@/lib/github/client';
-import { IssueSnapshot, toIssueSnapshot } from '@/lib/github/issueSnapshot';
+import { IssueSnapshot } from '@/lib/github/issueSnapshot';
 import { getRepositoryWithCache } from '@/lib/github/repositoryCache';
 import { fetchLinkedPRCounts } from '@/lib/github/graphql';
 import { GITHUB_API, SEARCH_CONFIG } from '@/lib/constants/github';
 import { parseRepoFromIssueUrl } from '@/lib/github/urlParser';
+import { IssueTransformer } from '@/lib/github/transformers/IssueTransformer';
 
 interface SearchFilters {
   language: string[];
@@ -127,30 +129,25 @@ export async function searchIssuesWithFilters(
   // If no minStars filter, just fetch once
   if (minStars === null || minStars <= 0) {
     const res = await fetchRawIssues(filters, page, options);
-    const snapshots = res.items.map(toIssueSnapshot);
-    // If we got more than 20 items due to parallel fetch, slice it to keep UI consistent?
-    // Or just show them all? Showing more is probably fine/better.
-    // Let's slice to 20 to keep page size consistent.
-    const slicedSnapshots = snapshots.slice(0, 20);
+    const snapshots = IssueTransformer.toSnapshots(res.items).slice(0, 20);
 
-    // Fetch linked PR counts if token is available
-    if (options.token) {
-      const prCounts = await fetchLinkedPRCounts(
-        res.items.slice(0, 20),
-        options.token,
-        options.signal
-      );
-      slicedSnapshots.forEach((snapshot) => {
-        const count = prCounts.get(snapshot.id);
-        if (count !== undefined) {
-          snapshot.linked_pr_count = count;
-        }
-      });
+    if (!options.token) {
+      return {
+        ...res,
+        items: snapshots,
+      };
     }
+
+    const prCounts = await fetchLinkedPRCounts(
+      res.items.slice(0, 20),
+      options.token,
+      options.signal
+    );
+    const enriched = IssueTransformer.enrichWithPRCounts(snapshots, prCounts);
 
     return {
       ...res,
-      items: slicedSnapshots,
+      items: enriched,
     };
   }
 
@@ -173,7 +170,7 @@ export async function searchIssuesWithFilters(
     // Fetch repo info
     const issuesWithRepo = await Promise.all(
       res.items.map(async (issue) => {
-        const snapshot = toIssueSnapshot(issue);
+        const snapshot = IssueTransformer.toSnapshots([issue])[0];
         const repoInfo = parseRepoFromIssueUrl(issue.html_url);
 
         if (!repoInfo) return snapshot;
@@ -189,6 +186,12 @@ export async function searchIssuesWithFilters(
           );
           return { ...snapshot, repository };
         } catch (err) {
+          if (err instanceof GitHubRateLimitError) {
+            console.warn(
+              'GitHub rate limit hit while enriching repository info; skipping.'
+            );
+            return snapshot;
+          }
           console.error('Failed to fetch repository info:', err);
           return snapshot;
         }
@@ -219,10 +222,9 @@ export async function searchIssuesWithFilters(
     // But we only have IssueSnapshot here. We need to reconstruct or store the original issues.
     // Actually, we can use the node_id from IssueSnapshot to query GraphQL.
     // Let's create a minimal GitHubIssue-like object for the GraphQL function.
-    const issuesForGraphQL = finalItems.map((snapshot) => ({
-      id: snapshot.id,
-      node_id: snapshot.node_id,
-    })) as GitHubIssue[];
+    const issuesForGraphQL = IssueTransformer.toGraphQLInput(
+      finalItems
+    ) as GitHubIssue[];
 
     const prCounts = await fetchLinkedPRCounts(
       issuesForGraphQL,
@@ -230,12 +232,13 @@ export async function searchIssuesWithFilters(
       options.signal
     );
 
-    finalItems.forEach((snapshot) => {
-      const count = prCounts.get(snapshot.id);
-      if (count !== undefined) {
-        snapshot.linked_pr_count = count;
-      }
-    });
+    const enriched = IssueTransformer.enrichWithPRCounts(finalItems, prCounts);
+
+    return {
+      total_count: totalCount,
+      incomplete_results: false,
+      items: enriched,
+    };
   }
 
   return {

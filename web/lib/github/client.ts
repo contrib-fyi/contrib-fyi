@@ -108,6 +108,13 @@ export interface SearchParams {
 
 const BASE_URL = 'https://api.github.com';
 
+export class GitHubRateLimitError extends Error {
+  constructor() {
+    super('Rate Limit Exceeded');
+    this.name = 'GitHubRateLimitError';
+  }
+}
+
 export async function searchIssues(
   params: SearchParams,
   options?: RequestOptions
@@ -140,7 +147,7 @@ export async function searchIssues(
 
   if (!response.ok) {
     if (response.status === 403) {
-      throw new Error('Rate Limit Exceeded');
+      throw new GitHubRateLimitError();
     }
     throw new Error(`GitHub API Error: ${response.statusText}`);
   }
@@ -170,7 +177,7 @@ export async function getRepository(
 
   if (!response.ok) {
     if (response.status === 403) {
-      throw new Error('Rate Limit Exceeded');
+      throw new GitHubRateLimitError();
     }
     throw new Error(`GitHub API Error: ${response.statusText}`);
   }
