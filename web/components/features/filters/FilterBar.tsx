@@ -14,6 +14,11 @@ import { useFilterStore } from '@/lib/store/useFilterStore';
 import { useTokenStore } from '@/lib/store/useTokenStore';
 import { X, Search, SlidersHorizontal } from 'lucide-react';
 import { MultiSelect } from '@/components/ui/multi-select';
+import {
+  LANGUAGE_OPTIONS,
+  LABEL_OPTIONS,
+  SORT_OPTIONS,
+} from '@/lib/constants/filters';
 import { Switch } from '@/components/ui/switch';
 import {
   Tooltip,
@@ -213,53 +218,7 @@ export function FilterBar() {
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Language</label>
                         <MultiSelect
-                          options={[
-                            { label: 'C', value: 'c' },
-                            { label: 'C++', value: 'c++' },
-                            { label: 'C#', value: 'c#' },
-                            { label: 'Clojure', value: 'clojure' },
-                            { label: 'CMake', value: 'cmake' },
-                            { label: 'CSS', value: 'css' },
-                            { label: 'Dart', value: 'dart' },
-                            { label: 'Dockerfile', value: 'dockerfile' },
-                            { label: 'Elixir', value: 'elixir' },
-                            { label: 'Emacs Lisp', value: 'emacs lisp' },
-                            { label: 'Erlang', value: 'erlang' },
-                            { label: 'F#', value: 'f#' },
-                            { label: 'Go', value: 'go' },
-                            { label: 'Groovy', value: 'groovy' },
-                            { label: 'Haskell', value: 'haskell' },
-                            { label: 'HCL', value: 'hcl' },
-                            { label: 'HTML', value: 'html' },
-                            { label: 'Java', value: 'java' },
-                            { label: 'JavaScript', value: 'javascript' },
-                            { label: 'Jinja', value: 'jinja' },
-                            { label: 'JSON', value: 'json' },
-                            { label: 'Kotlin', value: 'kotlin' },
-                            { label: 'Lua', value: 'lua' },
-                            { label: 'Makefile', value: 'makefile' },
-                            { label: 'Nix', value: 'nix' },
-                            { label: 'Objective-C', value: 'objective-c' },
-                            { label: 'OCaml', value: 'ocaml' },
-                            { label: 'Perl', value: 'perl' },
-                            { label: 'PHP', value: 'php' },
-                            { label: 'PowerShell', value: 'powershell' },
-                            { label: 'Python', value: 'python' },
-                            { label: 'R', value: 'r' },
-                            { label: 'Ruby', value: 'ruby' },
-                            { label: 'Rust', value: 'rust' },
-                            { label: 'Scala', value: 'scala' },
-                            { label: 'SCSS', value: 'scss' },
-                            { label: 'Shell', value: 'shell' },
-                            { label: 'SQL', value: 'sql' },
-                            { label: 'Svelte', value: 'svelte' },
-                            { label: 'Swift', value: 'swift' },
-                            { label: 'TypeScript', value: 'typescript' },
-                            { label: 'Vim Script', value: 'vim script' },
-                            { label: 'Vue', value: 'vue' },
-                            { label: 'YAML', value: 'yaml' },
-                            { label: 'Zig', value: 'zig' },
-                          ]}
+                          options={[...LANGUAGE_OPTIONS]}
                           selected={localLanguage}
                           onChange={setLocalLanguage}
                           placeholder="Select languages"
@@ -269,16 +228,7 @@ export function FilterBar() {
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Label</label>
                         <MultiSelect
-                          options={[
-                            { label: 'help wanted', value: 'help wanted' },
-                            {
-                              label: 'good first issue',
-                              value: 'good first issue',
-                            },
-                            { label: 'documentation', value: 'documentation' },
-                            { label: 'enhancement', value: 'enhancement' },
-                            { label: 'bug', value: 'bug' },
-                          ]}
+                          options={[...LABEL_OPTIONS]}
                           selected={localLabel}
                           onChange={setLocalLabel}
                           placeholder="Select labels"
@@ -299,13 +249,14 @@ export function FilterBar() {
                             <SelectValue placeholder="Sort by" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="created">Newest</SelectItem>
-                            <SelectItem value="updated">
-                              Recently Updated
-                            </SelectItem>
-                            <SelectItem value="comments">
-                              Most Commented
-                            </SelectItem>
+                            {SORT_OPTIONS.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
