@@ -8,6 +8,7 @@ import { fetchLinkedPRCounts } from '@/lib/github/graphql';
 import { GITHUB_API, SEARCH_CONFIG } from '@/lib/constants/github';
 import { IssueTransformer } from '@/lib/github/transformers/IssueTransformer';
 import { repositoryService } from '@/lib/github/services/RepositoryService';
+import { IssueQueryBuilder } from '@/lib/github/queryBuilder';
 
 interface SearchFilters {
   language: string[];
@@ -23,13 +24,6 @@ interface SearchOptions {
   token?: string | null;
 }
 
-const escapeForQualifier = (value: string) => `"${value.replace(/"/g, '\\"')}"`;
-
-const buildLabelQuery = (labels: string[]) => {
-  if (labels.length === 0) return null;
-  return `label:${labels.map(escapeForQualifier).join(',')}`;
-};
-
 /**
  * Fetches issues from GitHub API.
  * If multiple languages are specified, it fetches them in parallel to avoid
@@ -42,20 +36,14 @@ async function fetchRawIssues(
 ): Promise<SearchIssuesResponse<GitHubIssue>> {
   const { language, label, sort, searchQuery, onlyNoComments } = filters;
 
-  // Base query parts (excluding language)
-  const baseQParts = ['is:issue', 'is:open'];
+  const baseBuilder = IssueQueryBuilder.create()
+    .withBaseFilters()
+    .withLabels(label)
+    .withNoComments(onlyNoComments)
+    .withSearchQuery(searchQuery);
 
-  const labelQuery = buildLabelQuery(label);
-  if (labelQuery) baseQParts.push(labelQuery);
-
-  if (onlyNoComments) baseQParts.push('comments:0');
-  if (searchQuery) baseQParts.push(searchQuery);
-
-  // Helper to run search
-  const runSearch = async (langQuery: string | null) => {
-    const qParts = [...baseQParts];
-    if (langQuery) qParts.push(langQuery);
-    const q = qParts.join(' ');
+  const runSearch = async (lang: string | null) => {
+    const q = baseBuilder.clone().withLanguage(lang).build();
 
     return searchIssues(
       {
@@ -77,7 +65,7 @@ async function fetchRawIssues(
   }
 
   // If multiple languages, run parallel requests
-  const promises = language.map((lang) => runSearch(`language:"${lang}"`));
+  const promises = language.map((lang) => runSearch(lang));
 
   const results = await Promise.all(promises);
 
