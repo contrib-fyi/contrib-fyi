@@ -59,9 +59,7 @@ const decodeToken = (value: string): string => {
     if (/[\x80-\xFF]/.test(decoded)) {
       try {
         if (typeof TextDecoder !== 'undefined') {
-          const bytes = Uint8Array.from(decoded, (char) =>
-            char.charCodeAt(0)
-          );
+          const bytes = Uint8Array.from(decoded, (char) => char.charCodeAt(0));
           return new TextDecoder().decode(bytes);
         }
       } catch {
