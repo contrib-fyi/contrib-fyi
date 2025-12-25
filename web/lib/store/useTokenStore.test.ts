@@ -127,4 +127,42 @@ describe('useTokenStore', () => {
     const state = useTokenStore.getState();
     expect(state.token).toBe(longToken);
   });
+
+  it('should handle tokens with non-ASCII characters (UTF-8)', () => {
+    const { setToken } = useTokenStore.getState();
+    // This test ensures that non-ASCII characters don't cause encoding errors
+    // While real GitHub PATs don't contain these characters, users might
+    // accidentally paste text containing them
+    const tokenWithUnicode = 'ghp_テスト_🔑_token';
+
+    setToken(tokenWithUnicode);
+
+    const state = useTokenStore.getState();
+    expect(state.token).toBe(tokenWithUnicode);
+  });
+
+  it('should properly encode and decode tokens with Japanese characters', () => {
+    const { setToken } = useTokenStore.getState();
+    const tokenWithJapanese = 'トークン_test_日本語';
+
+    setToken(tokenWithJapanese);
+
+    // Verify it's stored in sessionStorage
+    const stored = sessionStorage.getItem('contrib-fyi-token');
+    expect(stored).toBeTruthy();
+
+    // Verify the token can be retrieved correctly
+    const state = useTokenStore.getState();
+    expect(state.token).toBe(tokenWithJapanese);
+  });
+
+  it('should handle tokens with mixed ASCII and non-ASCII characters', () => {
+    const { setToken } = useTokenStore.getState();
+    const mixedToken = 'ghp_abc123_日本語_эюя_😊';
+
+    setToken(mixedToken);
+
+    const state = useTokenStore.getState();
+    expect(state.token).toBe(mixedToken);
+  });
 });
