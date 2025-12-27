@@ -164,4 +164,34 @@ describe('FilterBar', () => {
     await screen.findByText('Advanced filters');
     expect(screen.queryByText('Minimum Stars')).not.toBeInTheDocument();
   });
+
+  it('clears minStars filter when token is removed', () => {
+    const mockFilterStateWithStars = {
+      language: [],
+      label: [],
+      sort: 'created' as const,
+      searchQuery: '',
+      onlyNoComments: false,
+      minStars: 100,
+      setLanguage: vi.fn(),
+      setLabel: vi.fn(),
+      setSort: vi.fn(),
+      setSearchQuery: vi.fn(),
+      setOnlyNoComments: vi.fn(),
+      setMinStars: mockSetMinStars,
+      resetFilters: vi.fn(),
+    } satisfies ReturnType<typeof useFilterStore>;
+
+    vi.mocked(useFilterStore).mockReturnValue(mockFilterStateWithStars);
+
+    const { rerender } = render(<FilterBar />);
+
+    // Initially token is present (from beforeEach)
+    // Now simulate token removal
+    setTokenSelectorResult(null);
+
+    rerender(<FilterBar />);
+
+    expect(mockSetMinStars).toHaveBeenCalledWith(null);
+  });
 });
