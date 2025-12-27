@@ -7,6 +7,7 @@ export interface SearchFilters {
   sort: 'created' | 'updated' | 'comments';
   searchQuery: string;
   onlyNoComments: boolean;
+  onlyNoLinkedPRs: boolean;
   minStars: number | null;
 }
 

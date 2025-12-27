@@ -12,6 +12,7 @@ describe('SearchStrategyFactory', () => {
       sort: 'created' as const,
       searchQuery: '',
       onlyNoComments: false,
+      onlyNoLinkedPRs: false,
       minStars: null,
     };
 
@@ -30,6 +31,7 @@ describe('SearchStrategyFactory', () => {
       sort: 'created' as const,
       searchQuery: '',
       onlyNoComments: false,
+      onlyNoLinkedPRs: false,
       minStars: 5,
     };
 

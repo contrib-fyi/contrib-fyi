@@ -55,6 +55,8 @@ You can configure your own GitHub Personal Access Token (PAT) to increase API ra
   - Filter issues by minimum repository stars to focus on well-established projects
 - Linked Pull Request Count
   - View the number of linked pull requests for each issue to assess activity and context
+- No linked PRs filter
+  - Show only issues that have no linked pull requests
 
 ### 🔖 My Picks
 

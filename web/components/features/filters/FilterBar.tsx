@@ -54,12 +54,14 @@ export function FilterBar() {
     sort: appliedSort,
     searchQuery: appliedSearchQuery,
     onlyNoComments: appliedOnlyNoComments,
+    onlyNoLinkedPRs: appliedOnlyNoLinkedPRs,
     minStars: appliedMinStars,
     setLanguage,
     setLabel,
     setSort,
     setSearchQuery,
     setOnlyNoComments,
+    setOnlyNoLinkedPRs,
     setMinStars,
     resetFilters,
   } = useFilterStore();
@@ -76,6 +78,9 @@ export function FilterBar() {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [pendingOnlyNoComments, setPendingOnlyNoComments] = useState(
     appliedOnlyNoComments
+  );
+  const [pendingOnlyNoLinkedPRs, setPendingOnlyNoLinkedPRs] = useState(
+    appliedOnlyNoLinkedPRs
   );
   const [pendingMinStars, setPendingMinStars] = useState<number | ''>(
     appliedMinStars ?? ''
@@ -116,6 +121,7 @@ export function FilterBar() {
     setLocalSort('created');
     setLocalSearchQuery('');
     setPendingMinStars('');
+    setPendingOnlyNoLinkedPRs(false);
   };
 
   // Handle Enter key in search input
@@ -131,6 +137,7 @@ export function FilterBar() {
     setSort(localSort);
     setSearchQuery(localSearchQuery);
     setOnlyNoComments(pendingOnlyNoComments);
+    setOnlyNoLinkedPRs(pendingOnlyNoLinkedPRs);
     setMinStars(pendingMinStars === '' ? null : Number(pendingMinStars));
     setAdvancedOpen(false);
   };
@@ -139,6 +146,7 @@ export function FilterBar() {
     setAdvancedOpen(open);
     if (open) {
       setPendingOnlyNoComments(appliedOnlyNoComments);
+      setPendingOnlyNoLinkedPRs(appliedOnlyNoLinkedPRs);
       setPendingMinStars(appliedMinStars ?? '');
     }
   };
@@ -173,6 +181,15 @@ export function FilterBar() {
             key: 'no-comments',
             label: 'No comments',
             onRemove: () => setOnlyNoComments(false),
+          },
+        ]
+      : []),
+    ...(appliedOnlyNoLinkedPRs
+      ? [
+          {
+            key: 'no-linked-prs',
+            label: 'No linked PRs',
+            onRemove: () => setOnlyNoLinkedPRs(false),
           },
         ]
       : []),
@@ -283,6 +300,22 @@ export function FilterBar() {
                           />
                         </div>
                       </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between rounded-lg border p-3">
+                          <div className="space-y-0.5">
+                            <label className="text-sm font-medium">
+                              No linked PRs
+                            </label>
+                            <p className="text-muted-foreground text-xs">
+                              Only show issues without linked pull requests
+                            </p>
+                          </div>
+                          <Switch
+                            checked={pendingOnlyNoLinkedPRs}
+                            onCheckedChange={setPendingOnlyNoLinkedPRs}
+                          />
+                        </div>
+                      </div>
                       {token && (
                         <div className="space-y-2">
                           <label className="text-sm font-medium">
@@ -312,7 +345,7 @@ export function FilterBar() {
                       <SheetClose asChild>
                         <Button
                           onClick={() => {
-                            handleAdvancedApply(); // Apply advanced filters (no comments)
+                            handleAdvancedApply(); // Apply advanced filters
                             handleSearch(); // Apply main filters
                           }}
                           className="w-full"
@@ -329,6 +362,7 @@ export function FilterBar() {
 
           {/* Desktop Filters */}
           <div className="hidden gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
+            {/* ... (existing tooltips) ... */}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -456,7 +490,9 @@ export function FilterBar() {
               <Button
                 type="button"
                 variant={
-                  appliedOnlyNoComments || appliedMinStars
+                  appliedOnlyNoComments ||
+                  appliedOnlyNoLinkedPRs ||
+                  appliedMinStars
                     ? 'secondary'
                     : 'outline'
                 }
@@ -471,26 +507,44 @@ export function FilterBar() {
               <DialogHeader>
                 <DialogTitle>Advanced filters</DialogTitle>
                 <DialogDescription>
-                  Narrow results with extra criteria like comments.
+                  Narrow results with extra criteria like comments and PRs.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Comments</p>
-                  <div className="flex items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-1 pr-4">
-                      <p className="text-sm font-medium">
-                        Only issues with zero comments
-                      </p>
-                      <p className="text-muted-foreground text-xs">
-                        Show issues that have not received any comments yet.
-                      </p>
+                  <p className="text-sm font-medium">Availability</p>
+                  <div className="grid gap-4">
+                    <div className="flex items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-1 pr-4">
+                        <p className="text-sm font-medium">
+                          Only issues with zero comments
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          Show issues that have not received any comments yet.
+                        </p>
+                      </div>
+                      <Switch
+                        id="advanced-no-comments"
+                        checked={pendingOnlyNoComments}
+                        onCheckedChange={setPendingOnlyNoComments}
+                      />
                     </div>
-                    <Switch
-                      id="advanced-no-comments"
-                      checked={pendingOnlyNoComments}
-                      onCheckedChange={setPendingOnlyNoComments}
-                    />
+                    <div className="flex items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-1 pr-4">
+                        <p className="text-sm font-medium">
+                          Only issues without linked PRs
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          Only issues that don&apos;t have any attached pull
+                          requests.
+                        </p>
+                      </div>
+                      <Switch
+                        id="advanced-no-linked-prs"
+                        checked={pendingOnlyNoLinkedPRs}
+                        onCheckedChange={setPendingOnlyNoLinkedPRs}
+                      />
+                    </div>
                   </div>
                 </div>
                 {token && (
