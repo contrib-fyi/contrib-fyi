@@ -9,12 +9,14 @@ interface FilterState {
   sort: 'created' | 'updated' | 'comments';
   searchQuery: string;
   onlyNoComments: boolean;
+  onlyNoLinkedPRs: boolean;
   minStars: number | null;
   setLanguage: (language: string[]) => void;
   setLabel: (label: string[]) => void;
   setSort: (sort: 'created' | 'updated' | 'comments') => void;
   setSearchQuery: (query: string) => void;
   setOnlyNoComments: (onlyNoComments: boolean) => void;
+  setOnlyNoLinkedPRs: (onlyNoLinkedPRs: boolean) => void;
   setMinStars: (minStars: number | null) => void;
   resetFilters: () => void;
 }
@@ -27,12 +29,14 @@ export const useFilterStore = create<FilterState>()(
       sort: 'created',
       searchQuery: '',
       onlyNoComments: false,
+      onlyNoLinkedPRs: false,
       minStars: null,
       setLanguage: (language) => set({ language }),
       setLabel: (label) => set({ label }),
       setSort: (sort) => set({ sort }),
       setSearchQuery: (searchQuery) => set({ searchQuery }),
       setOnlyNoComments: (onlyNoComments) => set({ onlyNoComments }),
+      setOnlyNoLinkedPRs: (onlyNoLinkedPRs) => set({ onlyNoLinkedPRs }),
       setMinStars: (minStars) => set({ minStars }),
       resetFilters: () =>
         set({
@@ -41,6 +45,7 @@ export const useFilterStore = create<FilterState>()(
           sort: 'created',
           searchQuery: '',
           onlyNoComments: false,
+          onlyNoLinkedPRs: false,
           minStars: null,
         }),
     }),
@@ -53,6 +58,7 @@ export const useFilterStore = create<FilterState>()(
         sort: state.sort,
         searchQuery: state.searchQuery,
         onlyNoComments: state.onlyNoComments,
+        onlyNoLinkedPRs: state.onlyNoLinkedPRs,
         minStars: state.minStars,
       }),
     }

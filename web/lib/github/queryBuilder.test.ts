@@ -11,6 +11,7 @@ describe('IssueQueryBuilder', () => {
       {
         label: ['help wanted', 'bug'],
         onlyNoComments: false,
+        onlyNoLinkedPRs: false,
         searchQuery: 'is:good-first-issue',
         language: [],
       },
@@ -27,6 +28,7 @@ describe('IssueQueryBuilder', () => {
       {
         label: ['foo"bar'],
         onlyNoComments: false,
+        onlyNoLinkedPRs: false,
         searchQuery: '',
         language: [],
       },
@@ -57,11 +59,26 @@ describe('IssueQueryBuilder', () => {
       {
         label: [],
         onlyNoComments: true,
+        onlyNoLinkedPRs: false,
         searchQuery: '',
         language: [],
       },
       null
     );
     expect(q).toContain('comments:0');
+  });
+
+  it('handles no-linked-prs filter', () => {
+    const q = buildQueryFromFilters(
+      {
+        label: [],
+        onlyNoComments: false,
+        onlyNoLinkedPRs: true,
+        searchQuery: '',
+        language: [],
+      },
+      null
+    );
+    expect(q).toContain('-linked:pr');
   });
 });

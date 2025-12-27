@@ -17,12 +17,20 @@ export async function fetchRawIssues(
   page: number,
   options: SearchOptions
 ): Promise<SearchIssuesResponse<GitHubIssue>> {
-  const { language, label, sort, searchQuery, onlyNoComments } = filters;
+  const {
+    language,
+    label,
+    sort,
+    searchQuery,
+    onlyNoComments,
+    onlyNoLinkedPRs,
+  } = filters;
 
   const baseBuilder = IssueQueryBuilder.create()
     .withBaseFilters()
     .withLabels(label)
     .withNoComments(onlyNoComments)
+    .withNoLinkedPRs(onlyNoLinkedPRs)
     .withSearchQuery(searchQuery);
 
   const runSearch = async (lang: string | null) => {

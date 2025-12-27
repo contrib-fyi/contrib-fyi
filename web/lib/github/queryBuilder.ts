@@ -32,6 +32,11 @@ export class IssueQueryBuilder {
     return this;
   }
 
+  withNoLinkedPRs(enabled: boolean): this {
+    if (enabled) this.parts.push('-linked:pr');
+    return this;
+  }
+
   withSearchQuery(query: string): this {
     if (query) this.parts.push(query);
     return this;
@@ -57,6 +62,7 @@ export function buildQueryFromFilters(
   filters: {
     label: string[];
     onlyNoComments: boolean;
+    onlyNoLinkedPRs: boolean;
     searchQuery: string;
     language: string[];
   },
@@ -66,6 +72,7 @@ export function buildQueryFromFilters(
     .withBaseFilters()
     .withLabels(filters.label)
     .withNoComments(filters.onlyNoComments)
+    .withNoLinkedPRs(filters.onlyNoLinkedPRs)
     .withSearchQuery(filters.searchQuery);
 
   const language =

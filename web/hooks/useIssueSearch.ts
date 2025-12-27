@@ -13,6 +13,7 @@ export function useIssueSearch() {
     sort,
     searchQuery,
     onlyNoComments,
+    onlyNoLinkedPRs,
     minStars,
     resetFilters,
   } = useFilterStore();
@@ -27,7 +28,7 @@ export function useIssueSearch() {
 
   useEffect(() => {
     setPage(1); // Reset page when filters change
-  }, [language, label, sort, searchQuery, onlyNoComments, minStars]);
+  }, [language, label, sort, searchQuery, onlyNoComments, onlyNoLinkedPRs, minStars]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,6 +46,7 @@ export function useIssueSearch() {
             sort,
             searchQuery,
             onlyNoComments,
+            onlyNoLinkedPRs,
             minStars,
           },
           page,
@@ -84,6 +86,7 @@ export function useIssueSearch() {
     sort,
     searchQuery,
     onlyNoComments,
+    onlyNoLinkedPRs,
     minStars,
     page,
     token,
