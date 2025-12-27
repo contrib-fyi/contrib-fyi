@@ -28,7 +28,15 @@ export function useIssueSearch() {
 
   useEffect(() => {
     setPage(1); // Reset page when filters change
-  }, [language, label, sort, searchQuery, onlyNoComments, onlyNoLinkedPRs, minStars]);
+  }, [
+    language,
+    label,
+    sort,
+    searchQuery,
+    onlyNoComments,
+    onlyNoLinkedPRs,
+    minStars,
+  ]);
 
   useEffect(() => {
     const controller = new AbortController();
