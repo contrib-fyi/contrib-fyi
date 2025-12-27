@@ -95,6 +95,13 @@ export function FilterBar() {
     };
   }, []);
 
+  // Clear restricted filters when token is removed
+  useEffect(() => {
+    if (!token && appliedMinStars !== null) {
+      setMinStars(null);
+    }
+  }, [token, appliedMinStars, setMinStars]);
+
   const handleSearch = () => {
     setLanguage(localLanguage);
     setLabel(localLabel);
