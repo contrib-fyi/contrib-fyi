@@ -8,11 +8,11 @@ export default function Home() {
         <h1 className="text-3xl font-bold tracking-tight">Find Issues</h1>
         <p className="text-muted-foreground text-lg">
           Discover{' '}
-          <span className="bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text font-extrabold text-transparent dark:from-blue-400 dark:to-cyan-300">
+          <span className="text-primary font-bold">
             &quot;Help Wanted&quot;
           </span>{' '}
           and{' '}
-          <span className="bg-linear-to-r from-purple-600 to-pink-500 bg-clip-text font-extrabold text-transparent dark:from-purple-400 dark:to-pink-300">
+          <span className="font-bold text-orange-500 dark:text-orange-400">
             &quot;Good First Issue&quot;
           </span>{' '}
           tasks across GitHub.

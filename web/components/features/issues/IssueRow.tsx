@@ -209,7 +209,7 @@ export function IssueRow({ issue }: IssueRowProps) {
             onClick={handlePickToggle}
             className={
               picked
-                ? 'border-yellow-200 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 dark:border-yellow-900'
+                ? 'border-orange-200 bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 dark:border-orange-900'
                 : ''
             }
           >
