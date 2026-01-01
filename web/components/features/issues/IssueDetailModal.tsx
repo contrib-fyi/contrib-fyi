@@ -176,6 +176,11 @@ export function IssueDetailModal({ issue, children }: IssueDetailModalProps) {
           <Button
             variant={picked ? 'secondary' : 'outline'}
             onClick={handlePickToggle}
+            className={
+              picked
+                ? 'border-orange-200 bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 dark:border-orange-900'
+                : ''
+            }
           >
             <Bookmark
               className={`mr-2 h-4 w-4 ${picked ? 'fill-current' : ''}`}

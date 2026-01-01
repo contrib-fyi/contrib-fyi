@@ -1,7 +1,7 @@
 <div align="center">
   <img src="web/app/logo.png" alt="Contrib.FYI Logo" width="150" height="150">
   <h1>Contrib.FYI</h1>
-    Find your next open source contribution on GitHub with ease.
+    Finding issues is easy. Deciding which ones are worth your time is not.
   <br><br>
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
   <img src="https://img.shields.io/badge/Built%20with-Next.js-black" alt="Built with Next.js">
@@ -12,55 +12,128 @@
   <h3>
     <a href="https://contrib-fyi.github.io/contrib-fyi/"> 👉 Visit the Web App</a>
   </h3>
+  <img src="docs/screenshot.png" alt="Contrib.FYI Screenshot">
 </div>
+
+Finding meaningful open source issues is harder than it should be.
+
+Contrib.FYI helps you find open source issues on GitHub while reducing the time wasted opening issues that are already being worked on.
 
 ## Why Contrib.FYI?
 
-There are many "Good First Issue" finders available today, but most rely on static lists of curated, popular repositories.
+[github-help-wanted](https://github.com/mac-s-g/github-help-wanted/) offered an excellent experience.
+Browsing issues in chronological order made it easy to discover projects
+I would never have found otherwise.
 
-I previously relied on [github-help-wanted](https://github.com/mac-s-g/github-help-wanted/). What I loved most about it was the **thrill of discovery**—because it displayed issues in chronological order, I often stumbled upon unexpectedly wonderful projects that I would have otherwise missed.
+Unfortunately, the service is no longer available.
 
-Contrib.FYI was built to preserve this experience of **serendipitous discovery**. It carries forward the "Dynamic Search" philosophy by combining real-time GitHub API access with a modern interface. With local issue tracking and personal token integration, it creates a robust environment where you can find fresh, exciting opportunities in the open source world.
+While rebuilding that experience, I noticed another problem.
 
-### Comparison
+> **Finding issues is easy.  
+> Deciding whether to work on them is expensive.**
 
-| Feature             | Contrib.FYI                       | Other Curated Sites           |
-| :------------------ | :-------------------------------- | :---------------------------- |
-| **Search Strategy** | Dynamic Search (Live GitHub Data) | Static Curation (Manual/Cron) |
-| **Niche Languages** | Any Language                      | Major ones only               |
-| **Repo Discovery**  | Find hidden gems                  | Famous repos only             |
-| **Rate Limit**      | High (Bring your own Token)       | Often limited                 |
-| **My Picks (Save)** | Local Storage                     | Rarely supported              |
+Many issues already have:
+
+- ongoing discussions
+- linked pull requests
+- contributors actively working on them
+
+Opening those issues only to realize this costs time and attention.
+Contrib.FYI keeps the discovery experience — but adds signals
+to reduce wasted effort _before_ you click.
+
+## What Contrib.FYI Does Differently
+
+Contrib.FYI is designed to preserve one specific experience:
+**serendipitous discovery**.
+
+Browsing issues in chronological order creates opportunities to stumble upon
+projects you were never explicitly looking for.
+This kind of accidental discovery is difficult to achieve with static,
+curated lists that surface the same popular repositories repeatedly.
+
+Contrib.FYI embraces this idea through a dynamic search approach,
+using live GitHub API data to reflect what is happening right now —
+while adding signals that help you decide whether an issue is worth your time.
+
+In practice, this means:
+
+- Uses live GitHub API data
+- Surfaces issues in real time
+- Preserves chronological discovery
+- Adds signals to reduce wasted effort
+
+This is not about finding more issues.
+It is about finding better candidates to spend your time on.
+
+This design intentionally trades optimization for exploration.
 
 ## Key Features
 
-### 🔍 Advanced Dynamic Search
+### 🔍 Dynamic, Real-Time Search
 
-Directly leverages the GitHub API to provide real-time information. Unlike curated lists, you find what is actually happening right now.
+Contrib.FYI directly queries the GitHub API.
+What you see reflects what is happening right now, not a cached or curated snapshot.
+
+This keeps discovery fresh and avoids the same well-known repositories dominating results.
 
 ### 🏷 Flexible Filtering
 
-Freely combine filters for programming languages, labels (e.g., "help wanted", "good first issue"), and exclude keywords to refine your search.
+You can freely combine filters such as:
 
-### 🔐 Privacy First & High Rate Limits
+- Programming language
+- Issue labels (e.g. `help wanted`, `good first issue`)
+- Excluded keywords
 
-You can configure your own GitHub Personal Access Token (PAT) to increase API rate limits from 60 to 5,000 requests per hour.
-**Privacy First:** Your token is stored strictly in your browser's `localStorage` and is never sent to any external server.
+This allows both broad exploration and focused searching.
 
-#### Additional Features with Token
+### 🔐 GitHub Token Integration (Optional but Recommended)
 
-- Repository Star Count
-  - See how popular each repository is at a glance
-- Star Filtering
-  - Filter issues by minimum repository stars to focus on well-established projects
-- Linked Pull Request Count
-  - View the number of linked pull requests for each issue to assess activity and context
-- No linked PRs filter
-  - Show only issues that have no linked pull requests
+By providing your own GitHub Personal Access Token (PAT), you unlock higher rate limits
+and additional signals that help reduce wasted effort.
+
+- API rate limit increases from 60 → 5,000 requests/hour
+- Your token is stored only in your browser’s `localStorage`
+- The token is never sent to any external server
+
+#### Additional Signals (With Token)
+
+These features exist for one purpose:
+to avoid spending time on issues that are already being handled.
+
+- **Repository star count**
+  - Focus on projects that match your desired scale
+- **Primary programming language**
+  - Avoid skill mismatches
+- **No comments filter**
+  - Reduce the chance of ongoing discussion
+- **No linked PRs filter**
+  - Avoid issues already being worked on
+
+Together, these signals help you make a decision before opening the issue.
 
 ### 🔖 My Picks
 
-Save interesting issues to your local "My Picks" list to review and tackle later.
+Interesting issues can be saved locally to your **My Picks** list.
+
+This allows you to:
+
+- collect candidates
+- compare later
+- return when you actually have time to work on them
+
+All data is stored locally in your browser.
+
+### Comparison
+
+| Feature          | Contrib.FYI                    | Other Curated Sites          |
+| ---------------- | ------------------------------ | ---------------------------- |
+| Search Strategy  | Dynamic (Live GitHub Data)     | Static (Manual / Cron-based) |
+| Discovery Style  | Chronological, serendipitous   | Popular repositories first   |
+| Niche Languages  | Any                            | Major languages only         |
+| Decision Signals | Stars, PRs, comments, language | Rarely available             |
+| Rate Limit       | High (Bring your own token)    | Often limited                |
+| Save Issues      | Local storage (My Picks)       | Rarely supported             |
 
 ---
 
@@ -70,7 +143,7 @@ If you want to run this project locally or contribute to its development, follow
 
 ### Prerequisites
 
-- Node.js 18+ or compatible package manager
+- Node.js 20+ or compatible package manager
 - (Optional) GitHub Personal Access Token for higher rate limits
 
 ### Installation
@@ -78,7 +151,7 @@ If you want to run this project locally or contribute to its development, follow
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/contrib-fyi.git
+git clone https://github.com/contrib-fyi/contrib-fyi.git
 cd contrib-fyi/web
 ```
 
