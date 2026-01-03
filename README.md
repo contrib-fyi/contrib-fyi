@@ -12,8 +12,9 @@
   <h3>
     <a href="https://contrib-fyi.github.io/contrib-fyi/"> 👉 Visit the Web App</a>
   </h3>
-  <img src="docs/screenshot.png" alt="Contrib.FYI Screenshot">
+  <img width="1160" height="1012" alt="SS 2026-01-03 22 33 11" src="https://github.com/user-attachments/assets/5d14610e-c02f-4e83-ad52-e55eed73e638" />
 </div>
+<br/>
 
 Finding meaningful open source issues is harder than it should be.
 
