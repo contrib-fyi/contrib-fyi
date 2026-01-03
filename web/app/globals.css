@@ -185,3 +185,21 @@
     opacity: 0;
   }
 }
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation-name: fade-in-up;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+  animation-timing-function: ease-out;
+}

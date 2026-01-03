@@ -57,8 +57,14 @@ export function IssueList() {
   return (
     <div className="space-y-4 p-4">
       <div className="space-y-4">
-        {data.items.map((issue) => (
-          <IssueRow key={issue.id} issue={issue} />
+        {data.items.map((issue, index) => (
+          <div
+            key={issue.id}
+            className="fade-in-up"
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <IssueRow issue={issue} />
+          </div>
         ))}
       </div>
 

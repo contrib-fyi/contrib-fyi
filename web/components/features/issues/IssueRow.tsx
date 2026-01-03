@@ -158,7 +158,7 @@ export function IssueRow({ issue }: IssueRowProps) {
             {/* Labels and language badge */}
             <div className="flex flex-wrap gap-2">
               {repository?.language && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-foreground text-xs">
                   {repository.language}
                 </Badge>
               )}
