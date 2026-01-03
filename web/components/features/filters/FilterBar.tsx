@@ -1,6 +1,11 @@
 'use client';
 
-import { useEffect, useState, type KeyboardEvent } from 'react';
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type KeyboardEvent,
+} from 'react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -66,11 +71,11 @@ export function FilterBar() {
     resetFilters,
   } = useFilterStore();
 
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const token = useTokenStore((state) => state.token);
 
