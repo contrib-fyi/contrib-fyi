@@ -1,6 +1,11 @@
 'use client';
 
-import { useEffect, useState, type KeyboardEvent } from 'react';
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type KeyboardEvent,
+} from 'react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -65,6 +70,12 @@ export function FilterBar() {
     setMinStars,
     resetFilters,
   } = useFilterStore();
+
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const token = useTokenStore((state) => state.token);
 
@@ -205,6 +216,10 @@ export function FilterBar() {
   ];
 
   const hasAppliedFilters = appliedFilterChips.length > 0;
+
+  if (!mounted) {
+    return <div className="min-h-[140px] space-y-4 border-b p-4" />;
+  }
 
   return (
     <div className="space-y-4 border-b p-4">
@@ -605,7 +620,7 @@ export function FilterBar() {
             <Badge
               key={chip.key}
               variant="secondary"
-              className="flex items-center gap-2 rounded-full px-3 py-1 text-sm"
+              className="text-foreground flex items-center gap-2 rounded-full px-3 py-1 text-sm"
             >
               {chip.label}
               <button
