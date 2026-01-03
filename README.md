@@ -132,7 +132,6 @@ All data is stored locally in your browser.
 | Discovery Style  | Chronological, serendipitous   | Popular repositories first   |
 | Niche Languages  | Any                            | Major languages only         |
 | Decision Signals | Stars, PRs, comments, language | Rarely available             |
-| Rate Limit       | High (Bring your own token)    | Often limited                |
 | Save Issues      | Local storage (My Picks)       | Rarely supported             |
 
 ---
